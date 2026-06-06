@@ -8,6 +8,7 @@ Assets.CLASSIC_2210 = Assets.PHONES .. "classic_2210/"
 Assets.CLASSIC_2210_BODY = Assets.CLASSIC_2210 .. "body/"
 
 Assets.SMARTPHONE = Assets.PHONES .. "smartphone/"
+Assets.SMARTPHONE_BODY = Assets.SMARTPHONE .. "body/"
 Assets.SMARTPHONE_APP_ICONS = Assets.SMARTPHONE .. "apps/icons/"
 Assets.SMARTPHONE_AVATARS = Assets.SMARTPHONE .. "avatars/"
 Assets.SMARTPHONE_WALLPAPERS = Assets.SMARTPHONE .. "wallpapers/"

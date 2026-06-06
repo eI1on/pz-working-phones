@@ -10,6 +10,7 @@ The current built-in phones are:
 ## Core Features
 
 - Inventory context option to open supported phones.
+- Lightweight dummy-item world spawning with weighted phone variants.
 - Per-phone persistent data stored on the phone item.
 - Unique phone numbers per physical phone.
 - Phone-to-phone messages through the KnoxNet object messaging layer.
@@ -19,6 +20,12 @@ The current built-in phones are:
 - Keyboard, mouse, and controller-compatible navigation.
 - Sound, vibrate, and silent alert modes.
 - Multiplayer-aware sound playback and zombie attraction for audible phone alerts.
+
+## World Spawning
+
+Phones spawn through a hidden dummy item that is replaced with a weighted registered phone variant when loot is generated. Classic 2210 variants are enabled by default. Smartphones are registered for spawning, but disabled by default through sandbox options.
+
+To make more phones appear, increase `Phone container spawns (%)` for containers and `Phone zombie spawns (%)` for zombies. `Spawn classic phones` and `Spawn smartphones` only decide which built-in phone families are allowed to replace a spawned dummy item.
 
 ## Sound Behavior
 

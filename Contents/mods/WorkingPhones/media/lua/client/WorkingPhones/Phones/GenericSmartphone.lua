@@ -1,11 +1,12 @@
+local Assets = require("WorkingPhones/Assets/PhoneAssets")
 local PhoneRegistry = require("WorkingPhones/Core/PhoneRegistry")
 
 return PhoneRegistry.register({
 	id = "generic_smartphone",
 	displayName = "Generic Smartphone",
 	displayNameKey = "PhoneGenericSmartphone",
-	texture = nil,
-	screenRect = { x = 18, y = 34, width = 324, height = 560 },
+	texture = Assets.SMARTPHONE_BODY .. "ui_working_phones_smartphone_front_black.png",
+	screenRect = { x = 40, y = 108, width = 539, height = 985 },
 	theme = "smartphone_light",
 	hardwareType = "smartphone",
 	supportedApps = {
@@ -56,8 +57,6 @@ return PhoneRegistry.register({
 		startsPowered = true,
 	},
 	panel = {
-		width = 360,
-		height = 640,
 		scale = 1.1,
 	},
 	buttons = {

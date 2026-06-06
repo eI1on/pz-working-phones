@@ -56,7 +56,35 @@ PhoneItemRegistry.registerVariant("my_mod_phone", "black", {
 	texture = "media/ui/MyPhoneAddon/phones/my_phone/body/front_black.png",
 })
 
-PhoneItemRegistry.registerItem("MyModPhoneBlack", "my_mod_phone", "black")
+PhoneItemRegistry.registerSpawnGroup("my_mod_phone", {
+	-- This is the phone family weight after a phone dummy has spawned.
+	-- Keep this separate from the variant weights below.
+	weight = 50,
+	sandboxEnabled = "MyPhoneAddon.SpawnMyModPhones",
+	hardwareType = "smartphone",
+})
+
+PhoneItemRegistry.registerItem("MyPhoneAddon.MyModPhoneBlack", "my_mod_phone", "black", {
+	-- Optional world spawning support.
+	-- Working Phones adds one hidden dummy item to selected loot tables, then replaces
+	-- that dummy with one phone family, then one variant from that family.
+	spawnWeight = 100,
+	hardwareType = "smartphone",
+})
+]]
+
+-- Optional addon sandbox-options.txt example:
+--[[
+VERSION = 1,
+
+option MyPhoneAddon.SpawnMyModPhones
+{
+	type = boolean,
+	default = true,
+	page = MyPhoneAddon,
+	translation = MyPhoneAddon_SpawnMyModPhones,
+}
+
 ]]
 
 -- Item script example:

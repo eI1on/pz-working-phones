@@ -1,5 +1,14 @@
 module WorkingPhones
 {
+    item PhoneSpawnDummy
+    {
+        DisplayCategory = Hidden,
+        Type = Normal,
+        DisplayName = Phone Spawn Dummy,
+        Icon	=	CordlessPhone,
+        Weight = 0.0,
+    }
+
     item Classic2210Phone
     {
         DisplayCategory = Electronics,

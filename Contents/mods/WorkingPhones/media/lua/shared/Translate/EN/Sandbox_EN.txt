@@ -6,4 +6,12 @@ Sandbox_EN = {
 	Sandbox_WorkingPhones_MessageHistoryPerContact_tooltip = "Maximum phone-to-phone messages kept by KnoxNet for each phone contact conversation.",
 	Sandbox_WorkingPhones_CallHistoryLimit = "Phone call history limit",
 	Sandbox_WorkingPhones_CallHistoryLimit_tooltip = "Maximum call records kept on each phone.",
+	Sandbox_WorkingPhones_PhoneLootSpawnRate = "Phone container spawns (%)",
+	Sandbox_WorkingPhones_PhoneLootSpawnRate_tooltip = "Global multiplier for phone spawns in world containers. 100 is normal, 200 doubles them, 50 halves them, 0 disables container spawns.",
+	Sandbox_WorkingPhones_PhoneZombieSpawnRate = "Phone zombie spawns (%)",
+	Sandbox_WorkingPhones_PhoneZombieSpawnRate_tooltip = "Global multiplier for phone spawns on zombies. 100 is normal, 200 doubles them, 50 halves them, 0 disables zombie spawns.",
+	Sandbox_WorkingPhones_SpawnClassicPhones = "Spawn classic phones",
+	Sandbox_WorkingPhones_SpawnClassicPhones_tooltip = "Allow classic monochrome phones to replace dummy phone loot.",
+	Sandbox_WorkingPhones_SpawnSmartphones = "Spawn smartphones",
+	Sandbox_WorkingPhones_SpawnSmartphones_tooltip = "Allow smartphones to replace dummy phone loot. Disabled by default.",
 }

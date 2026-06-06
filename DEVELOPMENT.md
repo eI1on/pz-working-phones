@@ -140,7 +140,63 @@ PhoneItemRegistry.registerVariant("my_mod_phone", "black", {
 	texture = "media/ui/MyPhoneAddon/phones/my_mod_phone/body/front_black.png",
 })
 
-PhoneItemRegistry.registerItem("MyModPhoneBlack", "my_mod_phone", "black")
+PhoneItemRegistry.registerItem("MyPhoneAddon.MyModPhoneBlack", "my_mod_phone", "black")
+```
+
+Optional world spawning:
+
+```lua
+PhoneItemRegistry.registerSpawnGroup("my_mod_phone", {
+	weight = 50,
+	sandboxEnabled = "MyPhoneAddon.SpawnMyModPhones",
+	hardwareType = "smartphone",
+})
+
+PhoneItemRegistry.registerItem("MyPhoneAddon.MyModPhoneBlack", "my_mod_phone", "black", {
+	spawnWeight = 100,
+	hardwareType = "smartphone",
+})
+```
+
+Working Phones does not add every real phone to loot tables. It adds one hidden dummy item to a curated set of likely phone containers, then replaces each dummy in two stages:
+
+- Choose a phone family/spawn group, such as `classic_2110`.
+- Choose one variant inside that family, such as black, blue, red, or gray.
+
+This keeps loot tables compact while still allowing many phone families and variants.
+
+Spawn fields:
+
+- `registerSpawnGroup(id, ...)`: defines a phone family that can be chosen after dummy loot spawns.
+- `weight`: relative family weight. If classic has `100` and smartphone has `25`, smartphones are rarer when enabled.
+- `sandboxEnabled`: optional boolean sandbox option for enabling or disabling the whole family. Use `SpawnClassicPhones` for this mod's `WorkingPhones` page or `MyAddon.SomeOption` for another sandbox page.
+- `spawnWeight`: relative weight for this exact item variant inside its family. Omit it or set it to `0` if the item should never replace dummy loot.
+- `hardwareType`: optional metadata for tooling and debugging.
+
+Built-in spawning:
+
+- Classic 2210 variants spawn by default.
+- Smartphone variants are registered as a rarer phone family, but `SpawnSmartphones` defaults to `false`.
+- `PhoneLootSpawnRate` scales world container dummy spawns.
+- `PhoneZombieSpawnRate` scales zombie inventory dummy spawns.
+- To increase the total amount of phones, raise `PhoneLootSpawnRate` or `PhoneZombieSpawnRate`.
+- To change which kind of phone appears, adjust family `weight` values in `registerSpawnGroup(...)`.
+- To change color/variant ratios, adjust `spawnWeight` values in `registerItem(...)`.
+- Built-in distribution targets use readable `points` in `PhoneDistribution.lua`; `100` points becomes a `1.00` PZ procedural weight before sandbox multipliers.
+
+Addon sandbox example:
+
+```txt
+VERSION = 1,
+
+option MyPhoneAddon.SpawnMyModPhones
+{
+	type = boolean,
+	default = true,
+	page = MyPhoneAddon,
+	translation = MyPhoneAddon_SpawnMyModPhones,
+}
+
 ```
 
 Item script example:
@@ -410,8 +466,9 @@ PhoneItemRegistry.registerVariant("my_mod_phone", "black", {
 Before releasing an addon:
 
 - All app `require(...)` paths resolve.
-- Item script full types match `PhoneItemRegistry.registerItem(...)`.
+- Item script full types match `PhoneItemRegistry.registerItem(...)`; add-on items should use full types such as `MyPhoneAddon.MyModPhoneBlack`.
 - Phone definition id matches item registry phone id.
+- Spawnable phone packs have a sensible `registerSpawnGroup(...)` and variant `spawnWeight` values.
 - Sound registry `event` values exist in `media/scripts`.
 - Texture paths start with `media/ui/...` and load in game.
 - Apps handle `BACK`, `SELECT`, mouse click, and scrolling where needed.

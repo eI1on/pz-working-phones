@@ -29,3 +29,39 @@ option WorkingPhones.CallHistoryLimit
 	page = WorkingPhones,
 	translation = WorkingPhones_CallHistoryLimit,
 }
+
+option WorkingPhones.PhoneLootSpawnRate
+{
+	type = integer,
+	default = 100,
+	min = 0,
+	max = 500,
+	page = WorkingPhones,
+	translation = WorkingPhones_PhoneLootSpawnRate,
+}
+
+option WorkingPhones.PhoneZombieSpawnRate
+{
+	type = integer,
+	default = 25,
+	min = 0,
+	max = 500,
+	page = WorkingPhones,
+	translation = WorkingPhones_PhoneZombieSpawnRate,
+}
+
+option WorkingPhones.SpawnClassicPhones
+{
+	type = boolean,
+	default = true,
+	page = WorkingPhones,
+	translation = WorkingPhones_SpawnClassicPhones,
+}
+
+option WorkingPhones.SpawnSmartphones
+{
+	type = boolean,
+	default = false,
+	page = WorkingPhones,
+	translation = WorkingPhones_SpawnSmartphones,
+}

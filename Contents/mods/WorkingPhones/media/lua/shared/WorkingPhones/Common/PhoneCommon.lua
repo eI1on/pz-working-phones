@@ -34,13 +34,40 @@ function PhoneCommon.soundMode(data)
 	return "sound"
 end
 
+function PhoneCommon.sandboxValue(key)
+	local vars = SandboxVars
+	if not vars then
+		return nil
+	end
+	local dot = string.find(key, "%.")
+	if dot then
+		local page = string.sub(key, 1, dot - 1)
+		local option = string.sub(key, dot + 1)
+		local pageVars = vars[page]
+		return pageVars and pageVars[option] or nil
+	end
+	local pageVars = vars.WorkingPhones
+	return pageVars and pageVars[key] or nil
+end
+
 function PhoneCommon.sandboxInt(key, fallback, minValue, maxValue)
-	local vars = SandboxVars and SandboxVars.WorkingPhones or nil
-	local value = vars and vars[key] or fallback
+	local value = PhoneCommon.sandboxValue(key) or fallback
 	value = math.floor(tonumber(value) or fallback or minValue or 0)
 	if minValue and value < minValue then return minValue end
 	if maxValue and value > maxValue then return maxValue end
 	return value
+end
+
+function PhoneCommon.sandboxBool(key, fallback)
+	local value = PhoneCommon.sandboxValue(key)
+	if value == nil then
+		return fallback == true
+	end
+	return value == true
+end
+
+function PhoneCommon.sandboxPercent(key, fallback, minValue, maxValue)
+	return PhoneCommon.sandboxInt(key, fallback, minValue or 0, maxValue or 10000) / 100
 end
 
 function PhoneCommon.messageHistoryLimit()
