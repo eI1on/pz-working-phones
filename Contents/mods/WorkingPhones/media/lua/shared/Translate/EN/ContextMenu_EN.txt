@@ -1,0 +1,4 @@
+ContextMenu_EN = {
+	ContextMenu_WorkingPhones_OpenPhone = "Open Phone",
+	ContextMenu_WorkingPhones_EditPhoneDisplayName = "Edit phone display name",
+}

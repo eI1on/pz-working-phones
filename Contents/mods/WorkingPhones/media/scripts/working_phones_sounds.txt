@@ -1,0 +1,178 @@
+module Base
+{
+	sound nokia_tune_type1
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/classic_2210/ringtones/nokia_tune_type1.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound nokia_tune_type2
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/classic_2210/ringtones/nokia_tune_type2.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound nokia_tune_type3
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/classic_2210/ringtones/nokia_tune_type3.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound nokia_tune_type4
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/classic_2210/ringtones/nokia_tune_type4.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound nokia_tune_type5
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/classic_2210/ringtones/nokia_tune_type5.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound nokia_tune_type6
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/classic_2210/ringtones/nokia_tune_type6.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound nokia_tune_type7
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/classic_2210/ringtones/nokia_tune_type7.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound working_phone_vibrate_placeholder
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/shared/vibration/phone_vibrating_short.ogg,
+			volume = 0.15,
+		}
+	}
+
+	sound phone_vibrating_short
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/shared/vibration/phone_vibrating_short.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound phone_vibrating_long
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/shared/vibration/phone_vibrating_long.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_alarm_1
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/alarms/smartphone_alarm_1.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_alarm_2
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/alarms/smartphone_alarm_2.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_alarm_3
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/alarms/smartphone_alarm_3.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_ringtone_1
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/ringtones/smartphone_ringtone_1.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_ringtone_2
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/ringtones/smartphone_ringtone_2.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_ringtone_3
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/ringtones/smartphone_ringtone_3.ogg,
+			volume = 1.0,
+		}
+	}
+}

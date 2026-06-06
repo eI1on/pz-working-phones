@@ -1,0 +1,31 @@
+VERSION = 1,
+
+option WorkingPhones.NearbyPhonesRadius
+{
+	type = integer,
+	default = 25,
+	min = 1,
+	max = 200,
+	page = WorkingPhones,
+	translation = WorkingPhones_NearbyPhonesRadius,
+}
+
+option WorkingPhones.MessageHistoryPerContact
+{
+	type = integer,
+	default = 100,
+	min = 1,
+	max = 500,
+	page = WorkingPhones,
+	translation = WorkingPhones_MessageHistoryPerContact,
+}
+
+option WorkingPhones.CallHistoryLimit
+{
+	type = integer,
+	default = 10,
+	min = 1,
+	max = 100,
+	page = WorkingPhones,
+	translation = WorkingPhones_CallHistoryLimit,
+}

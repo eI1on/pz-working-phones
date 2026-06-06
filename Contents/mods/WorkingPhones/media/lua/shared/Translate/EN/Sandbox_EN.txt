@@ -1,0 +1,9 @@
+Sandbox_EN = {
+	Sandbox_WorkingPhones = "Working Phones",
+	Sandbox_WorkingPhones_NearbyPhonesRadius = "Nearby phones radius",
+	Sandbox_WorkingPhones_NearbyPhonesRadius_tooltip = "Maximum distance in tiles for phones to appear in the Contacts app nearby phones list.",
+	Sandbox_WorkingPhones_MessageHistoryPerContact = "Phone messages per contact",
+	Sandbox_WorkingPhones_MessageHistoryPerContact_tooltip = "Maximum phone-to-phone messages kept by KnoxNet for each phone contact conversation.",
+	Sandbox_WorkingPhones_CallHistoryLimit = "Phone call history limit",
+	Sandbox_WorkingPhones_CallHistoryLimit_tooltip = "Maximum call records kept on each phone.",
+}
