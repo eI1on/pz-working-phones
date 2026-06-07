@@ -14,7 +14,7 @@ The current built-in phones are:
 - Per-phone persistent data stored on the phone item.
 - Unique phone numbers per physical phone.
 - Phone-to-phone messages through the KnoxNet object messaging layer.
-- Phone-to-phone call state and ringing notifications.
+- Phone-to-phone call state, ringing notifications, and connected voice through vanilla VOIP/radio transport when VOIP is enabled.
 - Contacts, call history, journal entries, alarms, settings, sounds, games, map, calendar, calculator, and messages.
 - Classic monochrome UI and smartphone color UI.
 - Keyboard, mouse, and controller-compatible navigation.

@@ -73,6 +73,9 @@ function PhoneUtils.playPhoneAlert(playerObj, eventName, data, broadcast, alertK
 		volume = volume,
 		playerObj = playerObj,
 		preview = preview == true,
+		alertKey = preview and nil or tostring(alertKind or "notification"),
+		loop = alertKind == "call",
+		loopInterval = alertKind == "call" and 3500 or nil,
 	})
 	if audible and radius > 0 and playerObj.getX and not isClient() then
 		addSound(playerObj, playerObj:getX(), playerObj:getY(), playerObj:getZ(), radius, math.max(1, math.floor(volume * 10)))
@@ -83,12 +86,19 @@ function PhoneUtils.playPhoneAlert(playerObj, eventName, data, broadcast, alertK
 			volume = volume,
 			radius = radius,
 			audible = audible,
+			alertKind = tostring(alertKind or "notification"),
+			sourceKey = tostring(data.phoneKey or ""),
+			loop = alertKind == "call",
 			x = playerObj.getX and playerObj:getX() or nil,
 			y = playerObj.getY and playerObj:getY() or nil,
 			z = playerObj.getZ and playerObj:getZ() or nil,
 		})
 	end
 	return true
+end
+
+function PhoneUtils.stopPhoneAlert(alertKind)
+	PhoneAudioEngine.stopAlert(tostring(alertKind or "notification"))
 end
 
 function PhoneUtils.toast(title, body, kind, id, ttlSeconds)

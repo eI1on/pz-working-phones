@@ -3,6 +3,7 @@ local PhoneUtils = require("WorkingPhones/Core/PhoneUtils")
 local I18N = require("WorkingPhones/Core/PhoneI18N")
 local SoundRegistry = require("WorkingPhones/Registries/PhoneSoundRegistry")
 local PhoneAudioEngine = require("WorkingPhones/Audio/PhoneAudioEngine")
+local VoiceBridge = require("WorkingPhones/Core/PhoneVoiceBridge")
 local App = setmetatable({}, { __index = Base })
 App.__index = App
 
@@ -26,6 +27,12 @@ local function findSoundIndex(list, id, eventName)
 		end
 	end
 	return 1
+end
+
+local function saveVolume(app, volume)
+	app.volume = math.max(0, math.min(1, tonumber(volume) or 0))
+	app.os.instance.data.volume = app.volume
+	VoiceBridge.refreshVolume(app.os.instance.data)
 end
 
 function App:new(os)
@@ -117,8 +124,7 @@ function App:handleInput(event)
 				self.focus = i
 				if SOUND_ROWS[i].volume then
 					local rel = math.max(0, math.min(1, (event.displayX - rect.sliderX) / math.max(1, rect.sliderW)))
-					self.volume = rel
-					self.os.instance.data.volume = self.volume
+					saveVolume(self, rel)
 					return true
 				end
 				if event.displayX < rect.x + rect.w / 2 then
@@ -142,8 +148,7 @@ function App:handleInput(event)
 			self:changeMode(-1)
 			self:previewSound("ringtone")
 		else
-			self.volume = math.max(0, self.volume - 0.1)
-			self.os.instance.data.volume = self.volume
+			saveVolume(self, self.volume - 0.1)
 		end
 		return true
 	elseif event.action == "RIGHT" then
@@ -154,8 +159,7 @@ function App:handleInput(event)
 			self:changeMode(1)
 			self:previewSound("ringtone")
 		else
-			self.volume = math.min(1, self.volume + 0.1)
-			self.os.instance.data.volume = self.volume
+			saveVolume(self, self.volume + 0.1)
 		end
 		return true
 	elseif event.action == "OK" then
@@ -166,8 +170,7 @@ function App:handleInput(event)
 		end
 	elseif event.action == "SCROLL_UP" or event.action == "SCROLL_DOWN" then
 		local delta = event.action == "SCROLL_UP" and 0.05 or -0.05
-		self.volume = math.max(0, math.min(1, self.volume + delta))
-		self.os.instance.data.volume = self.volume
+		saveVolume(self, self.volume + delta)
 		return true
 	end
 	return Base.handleInput(self, event)

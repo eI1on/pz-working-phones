@@ -39,7 +39,7 @@ return PhoneRegistry.register({
 	soundProfile = {
 		soundPacks = { "generic_smartphone", "shared_vibration" },
 		defaultRingtone = "smartphone_ring_1",
-		defaultNotification = "smartphone_ring_2",
+		defaultNotification = "smartphone_notification_1",
 		defaultAlarm = "smartphone_alarm_1",
 		defaultNotificationVibration = "phone_vibrate_short",
 		defaultCallVibration = "phone_vibrate_long",

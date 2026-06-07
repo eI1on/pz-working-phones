@@ -10,6 +10,7 @@ local PhoneUtils = require("WorkingPhones/Core/PhoneUtils")
 local PhoneAudioEngine = require("WorkingPhones/Audio/PhoneAudioEngine")
 local Common = require("WorkingPhones/Common/PhoneCommon")
 local SoundRegistry = require("WorkingPhones/Registries/PhoneSoundRegistry")
+local VoiceBridge = require("WorkingPhones/Core/PhoneVoiceBridge")
 
 local function tr(key, ...)
 	return I18N.get(key, ...)
@@ -66,6 +67,17 @@ local function localWorldData()
 	return data
 end
 
+local function clearStoredActiveCall(phoneNumber, callId)
+	if not phoneNumber or tostring(phoneNumber) == "" then return end
+	Service.scan(getPlayer(), true)
+	local phone = Service.findByNumber(phoneNumber)
+	if not phone then return end
+	local data = Persistence.getPhoneData(phone.item, phone.definition.id)
+	if data.activeCall and (not callId or tostring(data.activeCall.callId or "") == tostring(callId or "")) then
+		data.activeCall = nil
+	end
+end
+
 function Networking.on(command, handler)
 	Networking.listeners[command] = handler
 end
@@ -88,6 +100,7 @@ function Networking.requestCall(targetNumber, fromNumber)
 end
 
 function Networking.answerCall(callId, targetNumber)
+	PhoneUtils.stopPhoneAlert("call")
 	return Networking.send("AnswerCall", {
 		callId = callId,
 		targetNumber = targetNumber,
@@ -95,6 +108,8 @@ function Networking.answerCall(callId, targetNumber)
 end
 
 function Networking.declineCall(callId, number, reason)
+	PhoneUtils.stopPhoneAlert("call")
+	VoiceBridge.stopForPhoneNumber(number)
 	return Networking.send("DeclineCall", {
 		callId = callId,
 		number = number,
@@ -103,6 +118,9 @@ function Networking.declineCall(callId, number, reason)
 end
 
 function Networking.hangupCall(callId, number, reason)
+	PhoneUtils.stopPhoneAlert("call")
+	VoiceBridge.stop(callId)
+	VoiceBridge.stopForPhoneNumber(number)
 	return Networking.send("HangupCall", {
 		callId = callId,
 		number = number,
@@ -265,32 +283,51 @@ Networking.on("CallRinging", function(args)
 end)
 
 Networking.on("CallAnswered", function(args)
+	PhoneUtils.stopPhoneAlert("call")
 	local panel = WorkingPhones.PhonePanel and WorkingPhones.PhonePanel.activePanel
 	if panel and panel.instance then
 		panel.instance.data.activeCall = {
 			callId = args.callId,
 			targetNumber = tostring(args.targetNumber or ""),
 			state = "connected",
+			voiceChannel = tonumber(args.voiceChannel),
 		}
+		VoiceBridge.start({
+			callId = args.callId,
+			phoneNumber = panel.instance.number,
+			voiceChannel = args.voiceChannel,
+			data = panel.instance.data,
+		})
 		local app = panel.instance.os and panel.instance.os.currentApp
 		if app and app.onCallAnswered then app:onCallAnswered(args) end
 	end
 end)
 
 Networking.on("CallConnected", function(args)
+	PhoneUtils.stopPhoneAlert("call")
 	local panel = WorkingPhones.PhonePanel and WorkingPhones.PhonePanel.activePanel
 	if panel and panel.instance then
 		panel.instance.data.activeCall = {
 			callId = args.callId,
 			fromNumber = tostring(args.fromNumber or ""),
 			state = "connected",
+			voiceChannel = tonumber(args.voiceChannel),
 		}
+		VoiceBridge.start({
+			callId = args.callId,
+			phoneNumber = panel.instance.number,
+			voiceChannel = args.voiceChannel,
+			data = panel.instance.data,
+		})
 		local app = panel.instance.os and panel.instance.os.currentApp
 		if app and app.onCallConnected then app:onCallConnected(args) end
 	end
 end)
 
 Networking.on("CallRejected", function(args)
+	PhoneUtils.stopPhoneAlert("call")
+	local stoppedNumber = args.callId and VoiceBridge.stop(args.callId) or nil
+	clearStoredActiveCall(stoppedNumber, args.callId)
 	local panel = WorkingPhones.PhonePanel and WorkingPhones.PhonePanel.activePanel
 	if panel and panel.instance then
 		panel.instance.data.activeCall = nil
@@ -301,6 +338,9 @@ Networking.on("CallRejected", function(args)
 end)
 
 Networking.on("CallEnded", function(args)
+	PhoneUtils.stopPhoneAlert("call")
+	local stoppedNumber = VoiceBridge.stop(args.callId)
+	clearStoredActiveCall(stoppedNumber, args.callId)
 	local panel = WorkingPhones.PhonePanel and WorkingPhones.PhonePanel.activePanel
 	if panel and panel.instance then
 		panel.instance.data.activeCall = nil
@@ -323,7 +363,17 @@ Networking.on("PlayPhoneSound", function(args)
 		z = tonumber(args.z),
 		radius = tonumber(args.radius) or 0,
 		playerObj = getPlayer(),
+		alertKey = args.alertKey and tostring(args.alertKey) or nil,
+		loop = args.loop == true,
+		loopInterval = tostring(args.alertKind or "") == "call" and 3500 or nil,
 	})
+end)
+
+Networking.on("StopPhoneSound", function(args)
+	local alertKey = tostring(args.alertKey or "")
+	if alertKey ~= "" then
+		PhoneAudioEngine.stopAlert(alertKey)
+	end
 end)
 
 Networking.on("IncomingMessage", function(args)

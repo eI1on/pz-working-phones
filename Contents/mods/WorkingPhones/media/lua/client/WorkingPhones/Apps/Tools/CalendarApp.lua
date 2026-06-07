@@ -64,8 +64,8 @@ function App:dayOrder()
 		})
 	end
 	table.sort(days, function(a, b)
-		if a.col == b.col then return a.row < b.row end
-		return a.col < b.col
+		if a.row == b.row then return a.col < b.col end
+		return a.row < b.row
 	end)
 	return days
 end
@@ -80,10 +80,8 @@ function App:moveSelectedDay(action)
 		end
 	end
 	local target = selectedIndex
-	if action == "UP" then target = selectedIndex - 1 end
-	if action == "DOWN" then target = selectedIndex + 1 end
-	if action == "LEFT" then target = selectedIndex - 6 end
-	if action == "RIGHT" then target = selectedIndex + 6 end
+	if action == "UP" or action == "LEFT" or action == "SCROLL_UP" then target = selectedIndex - 1 end
+	if action == "DOWN" or action == "RIGHT" or action == "SCROLL_DOWN" then target = selectedIndex + 1 end
 	target = math.max(1, math.min(#days, target))
 	self.selectedDay = days[target].day
 	return true
@@ -127,7 +125,8 @@ function App:handleInput(event)
 			end
 		end
 	end
-	if event.action == "UP" or event.action == "DOWN" or event.action == "LEFT" or event.action == "RIGHT" then
+	if event.action == "UP" or event.action == "DOWN" or event.action == "LEFT" or event.action == "RIGHT"
+		or event.action == "SCROLL_UP" or event.action == "SCROLL_DOWN" then
 		return self:moveSelectedDay(event.action)
 	end
 	if event.action == "OK" then

@@ -14,6 +14,7 @@ local PhonePlayerByNumber = {}
 local PhoneInfoByKey = {}
 local ActiveCallByNumber = {}
 local ActiveCallByPlayer = {}
+local ActiveVoiceChannel = {}
 local CallsById = {}
 
 local function worldData()
@@ -85,13 +86,60 @@ local function sendToPhoneNumber(number, command, args)
 	return false
 end
 
+local function phoneSoundAlertKey(args)
+	local sourceKey = tostring(args and args.sourceKey or "")
+	local alertKind = tostring(args and args.alertKind or "notification")
+	if sourceKey == "" then
+		sourceKey = tostring(args and args.event or "phone")
+	end
+	return sourceKey .. ":" .. alertKind
+end
+
+local function broadcastStopPhoneSound(number, alertKind)
+	local info = phoneInfoByNumber(number)
+	if not info then return end
+	local alertKey = tostring(info.phoneKey or "") .. ":" .. tostring(alertKind or "call")
+	local players = getOnlinePlayers()
+	for i = 0, players:size() - 1 do
+		local target = players:get(i)
+		if target then
+			sendServerCommand(target, MODULE, "StopPhoneSound", {
+				alertKey = alertKey,
+				alertKind = tostring(alertKind or "call"),
+			})
+		end
+	end
+end
+
 local function clearCall(call)
 	if not call then return end
 	CallsById[call.id] = nil
+	if call.voiceChannel then ActiveVoiceChannel[tonumber(call.voiceChannel)] = nil end
 	if call.fromNumber then ActiveCallByNumber[tostring(call.fromNumber)] = nil end
 	if call.targetNumber then ActiveCallByNumber[tostring(call.targetNumber)] = nil end
 	if call.fromPlayerKey then ActiveCallByPlayer[call.fromPlayerKey] = nil end
 	if call.targetPlayerKey then ActiveCallByPlayer[call.targetPlayerKey] = nil end
+end
+
+local function voiceChannelSeed(call)
+	local text = tostring(call and call.id or getTimestampMs())
+	local seed = 0
+	for i = 1, #text do
+		seed = (seed * 33 + string.byte(text, i)) % 90000
+	end
+	return 900000 + seed
+end
+
+local function allocateVoiceChannel(call)
+	if call.voiceChannel then return call.voiceChannel end
+	local channel = voiceChannelSeed(call)
+	while ActiveVoiceChannel[channel] do
+		channel = channel + 200
+		if channel > 999800 then channel = 900000 end
+	end
+	ActiveVoiceChannel[channel] = call.id
+	call.voiceChannel = channel
+	return channel
 end
 
 local function sendToMatchingNumber(targetNumber, command, args)
@@ -233,8 +281,18 @@ function Commands.AnswerCall(playerObj, args)
 	local call = CallsById[tostring(args.callId or "")]
 	if not call or call.targetNumber ~= tostring(args.targetNumber or "") then return end
 	call.state = "connected"
-	sendToPhoneNumber(call.fromNumber, "CallAnswered", { callId = call.id, targetNumber = call.targetNumber })
-	sendToPhoneNumber(call.targetNumber, "CallConnected", { callId = call.id, fromNumber = call.fromNumber })
+	broadcastStopPhoneSound(call.targetNumber, "call")
+	local voiceChannel = allocateVoiceChannel(call)
+	sendToPhoneNumber(call.fromNumber, "CallAnswered", {
+		callId = call.id,
+		targetNumber = call.targetNumber,
+		voiceChannel = voiceChannel,
+	})
+	sendToPhoneNumber(call.targetNumber, "CallConnected", {
+		callId = call.id,
+		fromNumber = call.fromNumber,
+		voiceChannel = voiceChannel,
+	})
 end
 
 function Commands.DeclineCall(playerObj, args)
@@ -243,6 +301,7 @@ function Commands.DeclineCall(playerObj, args)
 	if not call then return end
 	local declinedBy = tostring(args.number or "")
 	local other = declinedBy == call.fromNumber and call.targetNumber or call.fromNumber
+	broadcastStopPhoneSound(declinedBy, "call")
 	sendToPhoneNumber(other, "CallRejected", { callId = call.id, targetNumber = declinedBy, reason = args.reason or "Declined" })
 	clearCall(call)
 end
@@ -253,6 +312,8 @@ function Commands.HangupCall(playerObj, args)
 	if not call then return end
 	local hungBy = tostring(args.number or "")
 	local other = hungBy == call.fromNumber and call.targetNumber or call.fromNumber
+	broadcastStopPhoneSound(call.fromNumber, "call")
+	broadcastStopPhoneSound(call.targetNumber, "call")
 	sendToPhoneNumber(other, "CallEnded", { callId = call.id, number = hungBy, reason = args.reason or "HungUp" })
 	clearCall(call)
 end
@@ -280,6 +341,9 @@ function Commands.PhoneSound(playerObj, args)
 					volume = volume,
 					radius = radius,
 					audible = args.audible ~= false,
+					alertKey = phoneSoundAlertKey(args),
+					alertKind = tostring(args.alertKind or "notification"),
+					loop = args.loop == true,
 					x = x,
 					y = y,
 					z = z,

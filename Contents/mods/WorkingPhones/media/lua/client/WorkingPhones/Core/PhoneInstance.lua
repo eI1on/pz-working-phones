@@ -19,6 +19,7 @@ function PhoneInstance:new(definition, playerObj, item)
 	SoundRegistry.applyDefaults(o.data, definition)
 	o.number = Persistence.getPhoneNumber(item, definition.id)
 	o.displayName = Persistence.getDisplayName(item, definition.displayNameKey and I18N.get(definition.displayNameKey) or definition.displayName, definition.id)
+	o.data.phoneKey = o.phoneKey
 	Networking.registerPhone(o.phoneKey, o.number, o.displayName)
 	o.signalStrength = o.data.signalStrength or 4
 	o.os = PhoneOS:new(o)

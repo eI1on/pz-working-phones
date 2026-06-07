@@ -69,6 +69,8 @@ function Service.scan(playerObj, force)
 				local number = Persistence.getPhoneNumber(item, definition.id)
 				local displayName = Persistence.getDisplayName(item, fallbackName, definition.id)
 				local phoneKey = Persistence.getPhoneKey(item, definition.id)
+				local data = Persistence.getPhoneData(item, definition.id)
+				data.phoneKey = phoneKey
 				Service.phonesByNumber[tostring(number)] = {
 					item = item,
 					mapping = mapping,

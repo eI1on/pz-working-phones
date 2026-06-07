@@ -66,7 +66,7 @@ PhoneItemRegistry.registerItem("Classic2210PhoneGray", "classic_2110", "gray", {
 	hardwareType = "classic",
 })
 
-PhoneItemRegistry.registerItem("Smartphone", "generic_smartphone", "black", {
+PhoneItemRegistry.registerItem("SmartphoneBlack", "generic_smartphone", "black", {
 	spawnWeight = 60,
 	hardwareType = "smartphone",
 })

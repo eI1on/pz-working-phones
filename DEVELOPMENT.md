@@ -13,6 +13,8 @@ Working Phones separates the physical item, phone definition, phone data, and ap
 - Server/global data is used for phone number uniqueness, calls, messages, and world high scores.
 - Apps are client-side UI modules registered with `PhoneAppRegistry`.
 
+Phone items should stay normal inventory items unless your addon has a separate reason to make them radios. Working Phones uses a hidden temporary radio proxy for connected voice calls: the phone UI manages the call, while `PhoneVoiceBridge` creates a vanilla radio `DeviceData`, tunes it to the private call channel, and removes it when the call ends. This keeps addon item scripts simple and avoids making phones behave like walkie-talkies outside phone calls.
+
 ## Folder Recommendations
 
 For addon mods, a clean layout usually looks like this:

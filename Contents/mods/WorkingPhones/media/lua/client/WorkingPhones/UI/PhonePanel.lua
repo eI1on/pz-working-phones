@@ -187,6 +187,16 @@ function PhonePanel:close()
 	if self.instance and self.instance.os and self.instance.os.currentApp and self.instance.os.currentApp.onClose then
 		self.instance.os.currentApp:onClose()
 	end
+	local notification = self.instance and self.instance.os and self.instance.os.notification
+	if notification and notification.kind == "call" then
+		Networking.declineCall(notification.callId, self.instance.number, "Declined")
+		self.instance.os:dismissNotification(notification)
+	end
+	if self.instance and self.instance.data and self.instance.data.activeCall then
+		local active = self.instance.data.activeCall
+		Networking.hangupCall(active.callId, self.instance.number, "HungUp")
+		self.instance.data.activeCall = nil
+	end
 	if self.prevJoypadFocus ~= nil and setJoypadFocus then
 		setJoypadFocus(self.playerNum or 0, self.prevJoypadFocus)
 	elseif self.joyfocus and setJoypadFocus then

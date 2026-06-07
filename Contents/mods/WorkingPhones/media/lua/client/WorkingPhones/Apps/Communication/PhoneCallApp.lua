@@ -84,6 +84,7 @@ function App:call(contact)
 end
 
 function App:hangup()
+	if self._closingCall then return end
 	local active = self.os.instance.data.activeCall
 	if active and active.callId then
 		Networking.hangupCall(active.callId, self.os.instance.number, "HungUp")
@@ -99,6 +100,27 @@ function App:hangup()
 	self.os.instance.data.activeCall = nil
 	self.activeCall = nil
 	self.status = tr("Ready")
+end
+
+function App:onClose()
+	if self.calling or self.os.instance.data.activeCall then
+		self._closingCall = true
+		local active = self.os.instance.data.activeCall
+		if active and active.callId then
+			Networking.hangupCall(active.callId, self.os.instance.number, "HungUp")
+		elseif self.calling then
+			Networking.hangupCall(nil, self.os.instance.number, "HungUp")
+		end
+		if self.history[1] then
+			self.history[1].result = tr("HungUp")
+			self.history[1].date = gameDateTime()
+			self:save()
+		end
+		self.calling = nil
+		self.os.instance.data.activeCall = nil
+		self.activeCall = nil
+		self._closingCall = false
+	end
 end
 
 function App:showIncoming(fromNumber)
@@ -121,6 +143,7 @@ function App:onCallAnswered(args)
 		callId = args.callId,
 		targetNumber = tostring(args.targetNumber or ""),
 		state = "connected",
+		voiceChannel = tonumber(args.voiceChannel),
 	}
 	if self.history[1] then
 		self.history[1].result = tr("Answered")
@@ -135,6 +158,7 @@ function App:onCallConnected(args)
 		callId = args.callId,
 		fromNumber = tostring(args.fromNumber or ""),
 		state = "connected",
+		voiceChannel = tonumber(args.voiceChannel),
 	}
 	self.status = tr("OnCallWith", self:contactLabel(args.fromNumber))
 end

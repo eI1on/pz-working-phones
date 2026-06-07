@@ -1,6 +1,6 @@
 version=1
 id=
-title=[B41] Working Phones
+title=[B41] Working Phones 
 description=[h1]Working Phones[/h1]
 description=This mod adds real, usable phones to the game.
 description=
@@ -132,5 +132,5 @@ description=This mod's permissions fall under TIS's policy [url=https://theindie
 description=This mod cannot be modified by anyone else, for anything else, at all, ever. Even if the user disappears, they would much rather you didn't touch the fruits of their hard labour.
 description=[/quote]
 description=[url=http://theindiestone.com/forums/index.php/topic/2530-mod-permissions/?p=36479][img] https://raw.githubusercontent.com/eI1on/workshop_resources/main/mod_permissions_images/on_lockdown.png [/img][/url]
-tags=Build 41;Interface;Items;Literature;Misc;Multiplayer;Realistic
+tags=Build 41;Framework;Interface;Items;Misc;Multiplayer;Realistic
 visibility=public

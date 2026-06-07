@@ -9,6 +9,26 @@ module WorkingPhones
         Weight = 0.0,
     }
 
+    item PhoneVoiceProxy
+    {
+        Type = Radio,
+        Icon = CordlessPhone,
+        Weight = 0.0,
+        UseDelta = 0.0,
+        UseWhileEquipped = FALSE,
+        DisappearOnUse = FALSE,
+        TwoWay = TRUE,
+        TransmitRange = 1000000,
+        MicRange = 5,
+        BaseVolumeRange = 10,
+        IsPortable = TRUE,
+        IsTelevision = FALSE,
+        MinChannel = 200,
+        MaxChannel = 1000000,
+        UsesBattery = TRUE,
+        NoTransmit = TRUE,
+    }
+
     item Classic2210Phone
     {
         DisplayCategory = Electronics,
@@ -53,11 +73,11 @@ module WorkingPhones
         Tooltip = Tooltip_WorkingPhones_Phone,
     }
 
-    item Smartphone
+    item SmartphoneBlack
     {
         DisplayCategory = Electronics,
         Type = Normal,
-        DisplayName = Smartphone,
+        DisplayName = Black Smartphone,
         Icon	=	CordlessPhone,
         WorldStaticModel = CordlessPhone,
         Weight = 0.25,

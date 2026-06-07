@@ -175,4 +175,92 @@ module Base
 			volume = 1.0,
 		}
 	}
+
+	sound smartphone_ringtone_4
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/ringtones/smartphone_ringtone_4.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_notification_1
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/notifications/smartphone_notification_1.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_notification_2
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/notifications/smartphone_notification_2.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_notification_3
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/notifications/smartphone_notification_3.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_notification_4
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/notifications/smartphone_notification_4.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_notification_5
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/notifications/smartphone_notification_5.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_notification_6
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/notifications/smartphone_notification_6.ogg,
+			volume = 1.0,
+		}
+	}
+
+	sound smartphone_notification_7
+	{
+		category = Item,
+		maxInstancesPerEmitter = 10,
+		clip
+		{
+			file = media/sound/phones/smartphone/notifications/smartphone_notification_7.ogg,
+			volume = 1.0,
+		}
+	}
 }
