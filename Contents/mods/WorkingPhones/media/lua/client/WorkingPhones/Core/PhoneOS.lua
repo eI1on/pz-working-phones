@@ -197,6 +197,17 @@ function PhoneOS:handleInput(event)
 			local selected = self.apps[self.selectedIndex]
 			return selected and self:openApp(selected.id) or false
 		end
+	elseif event.action == "KEYPAD" then
+		if self.mode == "menu" then
+			local value = tonumber(event.value)
+			if value and value >= 1 and value <= #self.apps then
+				self.selectedIndex = value
+				return self:openApp(self.apps[value].id)
+			end
+		end
+		return true
+	elseif event.action == "ABC" then
+		return true
 	elseif event.action == "MOUSE_DOWN" and event.displayX and event.displayY and not self.currentApp then
 		if self.mode == "launcher" then
 			return false

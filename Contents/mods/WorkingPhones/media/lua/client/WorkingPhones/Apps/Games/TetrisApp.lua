@@ -162,6 +162,14 @@ function App:rotate()
 end
 
 function App:handleInput(event)
+	if event.action == "KEYPAD" then
+		local value = tostring(event.value or "")
+		if value == "2" or value == "5" then event = { action = "OK" }
+		elseif value == "4" then event = { action = "LEFT" }
+		elseif value == "6" then event = { action = "RIGHT" }
+		elseif value == "8" then event = { action = "DOWN" }
+		end
+	end
 	if self.mode == "menu" or self.mode == "scores" then
 		if self.mode == "scores" and (event.action == "RIGHT_SOFT" or event.action == "BACK" or event.action == "LEFT_SOFT") then
 			self.mode = "menu"; return true

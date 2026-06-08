@@ -20,6 +20,8 @@ local KEYBINDINGS = {
 	ALT_RIGHT = { name = "WorkingPhones_PhoneAltRight", key = Keyboard and Keyboard.KEY_NONE or 0 },
 	LEFT_SOFT = { name = "WorkingPhones_PhoneLeftSoft", key = Keyboard and Keyboard.KEY_Q or 0 },
 	RIGHT_SOFT = { name = "WorkingPhones_PhoneRightSoft", key = Keyboard and Keyboard.KEY_E or 0 },
+	CLEAR = { name = "WorkingPhones_PhoneClear", key = Keyboard and Keyboard.KEY_NONE or 0 },
+	ABC = { name = "WorkingPhones_PhoneABC", key = Keyboard and Keyboard.KEY_NONE or 0 },
 	OK = { name = "WorkingPhones_PhoneOK", key = Keyboard and Keyboard.KEY_RETURN or 0 },
 	BACK = { name = "WorkingPhones_PhoneBack", key = Keyboard and Keyboard.KEY_BACK or 0 },
 	MENU = { name = "WorkingPhones_PhoneMenu", key = Keyboard and Keyboard.KEY_TAB or 0 },
@@ -40,6 +42,8 @@ local KEYBINDING_ORDER = {
 	"BACK",
 	"LEFT_SOFT",
 	"RIGHT_SOFT",
+	"CLEAR",
+	"ABC",
 	"MENU",
 }
 
@@ -47,20 +51,38 @@ WorkingPhones.PhoneKeyBindings = KEYBINDINGS
 
 local SETTINGS = {
 	options = {
-		ui_scale = 4,
+		classic_phone_scale = 6,
+		smartphone_scale = 6,
 		show_input_hints = true,
 	},
 	options_data = {
-		ui_scale = {
-			"0.75",
+		classic_phone_scale = {
+			"0.50",
+			"0.60",
+			"0.70",
+			"0.80",
 			"0.90",
 			"1.00",
 			"1.10",
 			"1.25",
 			"1.50",
-			name = "IGUI_WorkingPhones_ModOptions_UIScale",
-			tooltip = "IGUI_WorkingPhones_ModOptions_UIScale_Tooltip",
-			default = 4,
+			name = "IGUI_WorkingPhones_ModOptions_ClassicScale",
+			tooltip = "IGUI_WorkingPhones_ModOptions_ClassicScale_Tooltip",
+			default = 3,
+		},
+		smartphone_scale = {
+			"0.50",
+			"0.60",
+			"0.70",
+			"0.80",
+			"0.90",
+			"1.00",
+			"1.10",
+			"1.25",
+			"1.50",
+			name = "IGUI_WorkingPhones_ModOptions_SmartphoneScale",
+			tooltip = "IGUI_WorkingPhones_ModOptions_SmartphoneScale_Tooltip",
+			default = 3,
 		},
 		show_input_hints = {
 			name = "IGUI_WorkingPhones_ModOptions_ShowInputHints",
@@ -77,9 +99,12 @@ local function applySettings(optionValues)
 	local settings = optionValues and optionValues.settings or SETTINGS
 	WorkingPhones.Options = settings.options or WorkingPhones.Options or {}
 	PhoneSettings.apply(WorkingPhones.Options)
+	if PhonePanel.activePanel and PhonePanel.activePanel.refreshLayout then
+		PhonePanel.activePanel:refreshLayout()
+	end
 end
 
-local SETTINGS_OPTION_IDS = { "ui_scale", "show_input_hints" }
+local SETTINGS_OPTION_IDS = { "classic_phone_scale", "smartphone_scale", "show_input_hints" }
 for i = 1, #SETTINGS_OPTION_IDS do
 	local option = SETTINGS.options_data[SETTINGS_OPTION_IDS[i]]
 	if option then

@@ -1,11 +1,13 @@
 UI_EN = {
 	UI_optionscreen_binding_Working Phones = "Working Phone",
 	UI_optionscreen_binding_WorkingPhones_OpenPhone = "Open first phone",
+	UI_optionscreen_binding_WorkingPhones_PhoneABC = "Phone: ABC",
 	UI_optionscreen_binding_WorkingPhones_PhoneAltDown = "Phone: Down (alternate)",
 	UI_optionscreen_binding_WorkingPhones_PhoneAltLeft = "Phone: Left (alternate)",
 	UI_optionscreen_binding_WorkingPhones_PhoneAltRight = "Phone: Right (alternate)",
 	UI_optionscreen_binding_WorkingPhones_PhoneAltUp = "Phone: Up (alternate)",
 	UI_optionscreen_binding_WorkingPhones_PhoneBack = "Phone: Back",
+	UI_optionscreen_binding_WorkingPhones_PhoneClear = "Phone: Clear",
 	UI_optionscreen_binding_WorkingPhones_PhoneDown = "Phone: Down",
 	UI_optionscreen_binding_WorkingPhones_PhoneLeft = "Phone: Left",
 	UI_optionscreen_binding_WorkingPhones_PhoneLeftSoft = "Phone: Left soft key",

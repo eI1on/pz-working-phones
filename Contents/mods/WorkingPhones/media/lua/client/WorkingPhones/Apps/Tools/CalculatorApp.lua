@@ -157,7 +157,9 @@ function App:handleInput(event)
 	if event.action == "LEFT" then self.selectedCol = math.max(1, self.selectedCol - 1); return true end
 	if event.action == "RIGHT" then self.selectedCol = math.min(#buttons[self.selectedRow], self.selectedCol + 1); return true end
 	if event.action == "OK" then self:press(buttons[self.selectedRow][self.selectedCol]); return true end
-	if event.action == "LEFT_SOFT" then self:clear(); return true end
+	if event.action == "LEFT_SOFT" or event.action == "CLEAR" then self:clear(); return true end
+	if event.action == "KEYPAD" and event.value then self:press(tostring(event.value)); return true end
+	if event.action == "OPERATOR" and event.value then self:press(tostring(event.value)); return true end
 	if event.action == "MOUSE_DOWN" and event.displayX and event.displayY then
 		local x, y, w, h, gridButtons = self:getGridRect(self.lastDisplay)
 		if x then

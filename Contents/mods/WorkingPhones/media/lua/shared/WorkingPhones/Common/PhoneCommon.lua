@@ -103,6 +103,11 @@ function PhoneCommon.scaledRect(rect, scale)
 		y = math.floor(rect.y * scale),
 		width = math.floor(rect.width * scale),
 		height = math.floor(rect.height * scale),
+		action = rect.action,
+		value = rect.value,
+		letters = rect.letters,
+		label = rect.label,
+		labelKey = rect.labelKey,
 	}
 end
 

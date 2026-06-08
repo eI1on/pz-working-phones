@@ -59,6 +59,10 @@ return PhoneRegistry.register({
 	panel = {
 		scale = 1.1,
 	},
+	buttonOrder = {
+		"POWER",
+	},
 	buttons = {
+		POWER = { x = 0, y = 0, width = 0, height = 0 },
 	},
 })

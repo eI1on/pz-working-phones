@@ -22,10 +22,12 @@ end
 
 local function panelScale(definition, baseHeight)
 	local panel = definition.panel or {}
-	local wantedScale = (tonumber(panel.scale) or 1) * (tonumber(PhoneSettings.uiScale) or 1)
+	local hardwareScale = PhoneSettings.scaleForHardware and PhoneSettings.scaleForHardware(definition.hardwareType) or 1
+	local wantedScale = tonumber(panel.scale) or 1
 	local maxScreenRatio = tonumber(panel.maxScreenHeightRatio) or 0.7
 	local maxHeight = math.floor(getCore():getScreenHeight() * maxScreenRatio)
-	return math.min(wantedScale, maxHeight / baseHeight)
+	local fittedScale = math.min(wantedScale, maxHeight / baseHeight)
+	return fittedScale * hardwareScale
 end
 
 local function tr(key, ...)
@@ -45,22 +47,53 @@ local FALLBACK_KEYS = {
 	BACK = Keyboard and Keyboard.KEY_BACK or 0,
 	LEFT_SOFT = Keyboard and Keyboard.KEY_Q or 0,
 	RIGHT_SOFT = Keyboard and Keyboard.KEY_E or 0,
+	CLEAR = Keyboard and Keyboard.KEY_NONE or 0,
+	ABC = Keyboard and Keyboard.KEY_NONE or 0,
 	MENU = Keyboard and Keyboard.KEY_TAB or 0,
 	POWER = Keyboard and Keyboard.KEY_P or 0,
 	OPEN_PHONE = Keyboard and Keyboard.KEY_NONE or 0,
 }
 
 local HINT_LINE_KEYS = {
-	{ "InputHintLineUp", "UP", "ALT_UP" },
-	{ "InputHintLineDown", "DOWN", "ALT_DOWN" },
-	{ "InputHintLineLeft", "LEFT", "ALT_LEFT" },
-	{ "InputHintLineRight", "RIGHT", "ALT_RIGHT" },
-	{ "InputHintLineOK", "OK" },
-	{ "InputHintLineBack", "BACK" },
-	{ "InputHintLineSoft", "LEFT_SOFT", "RIGHT_SOFT" },
-	{ "InputHintLineMenu", "MENU" },
+	{ "InputHintLineUp",    "UP",        "ALT_UP" },
+	{ "InputHintLineDown",  "DOWN",      "ALT_DOWN" },
+	{ "InputHintLineLeft",  "LEFT",      "ALT_LEFT" },
+	{ "InputHintLineRight", "RIGHT",     "ALT_RIGHT" },
+	{ "InputHintLineOK",    "OK" },
+	{ "InputHintLineBack",  "BACK" },
+	{ "InputHintLineSoft",  "LEFT_SOFT", "RIGHT_SOFT" },
+	{ "InputHintLineClear", "CLEAR" },
+	{ "InputHintLineABC",   "ABC" },
+	{ "InputHintLineMenu",  "MENU" },
 	{ "InputHintLinePower", "POWER" },
-	{ "InputHintLineOpen", "OPEN_PHONE" },
+	{ "InputHintLineOpen",  "OPEN_PHONE" },
+}
+
+local DEFAULT_BUTTON_ORDER = {
+	"POWER",
+	"LEFT_SOFT",
+	"RIGHT_SOFT",
+	"MENU",
+	"BACK",
+	"OK",
+	"UP",
+	"DOWN",
+	"LEFT",
+	"RIGHT",
+	"CLEAR",
+	"ABC",
+	"KEY_1",
+	"KEY_2",
+	"KEY_3",
+	"KEY_4",
+	"KEY_5",
+	"KEY_6",
+	"KEY_7",
+	"KEY_8",
+	"KEY_9",
+	"KEY_STAR",
+	"KEY_0",
+	"KEY_HASH",
 }
 
 local HINT_CONTROLLER_LINES = {
@@ -71,6 +104,18 @@ local HINT_CONTROLLER_LINES = {
 	"InputHintPadLineMenu",
 	"InputHintPadLinePower",
 }
+
+local function hintMetrics(phoneFrameWidth, scale)
+	local hintMargin = math.max(8, math.floor(8 * scale))
+	local hintsWidth = 0
+	local hintsHeight = 0
+	if PhoneSettings.showInputHints then
+		local longestModeLines = math.max(#HINT_LINE_KEYS, #HINT_CONTROLLER_LINES)
+		hintsHeight = 5 + 13 + 12 + longestModeLines * 12 + 5
+		hintsWidth = math.max(132, math.min(220, math.floor(phoneFrameWidth * 0.58)))
+	end
+	return hintMargin, hintsWidth, hintsHeight
+end
 
 local function boundKey(action)
 	local bindings = WorkingPhones and WorkingPhones.PhoneKeyBindings or nil
@@ -122,6 +167,8 @@ local function keyAction(key)
 	if keyMatches(key, "RIGHT_SOFT") then return "RIGHT_SOFT" end
 	if keyMatches(key, "OK") then return "OK" end
 	if keyMatches(key, "BACK") then return "BACK" end
+	if keyMatches(key, "CLEAR") then return "CLEAR" end
+	if keyMatches(key, "ABC") then return "ABC" end
 	if keyMatches(key, "MENU") then return "MENU" end
 	if keyMatches(key, "POWER") then return "POWER" end
 
@@ -137,7 +184,7 @@ local function keyAction(key)
 	if Keyboard.KEY_8 then digitKeys[Keyboard.KEY_8] = 8 end
 	if Keyboard.KEY_9 then digitKeys[Keyboard.KEY_9] = 9 end
 	if digitKeys[key] ~= nil then
-		return "DIGIT", { value = digitKeys[key] }
+		return "KEYPAD", { value = tostring(digitKeys[key]) }
 	end
 	if key == Keyboard.KEY_EQUALS then return "OPERATOR", { value = "+" } end
 	if key == Keyboard.KEY_MINUS then return "OPERATOR", { value = "-" } end
@@ -170,13 +217,29 @@ local function textInputForKey(key)
 	return nil
 end
 
+local function definitionButtonOrder(definition)
+	local order = definition and definition.buttonOrder or nil
+	if type(order) == "table" then
+		return order
+	end
+	return DEFAULT_BUTTON_ORDER
+end
+
 function PhonePanel:initialise()
 	ISPanel.initialise(self)
 	self.phoneTexture = self.phoneTexture or (self.definition.texture and getTexture(self.definition.texture)) or nil
 	self.screenRect = Common.scaledRect(self.definition.screenRect, self.scale)
 	self.scaledButtons = {}
-	for action, rect in pairs(self.definition.buttons or {}) do
-		self.scaledButtons[action] = Common.scaledRect(rect, self.scale)
+	self.buttonOrder = definitionButtonOrder(self.definition)
+	for i = 1, #self.buttonOrder do
+		local buttonId = self.buttonOrder[i]
+		local rect = self.definition.buttons and self.definition.buttons[buttonId] or nil
+		if rect then
+			local scaled = Common.scaledRect(rect, self.scale)
+			scaled.action = scaled.action or buttonId
+			scaled.buttonId = buttonId
+			self.scaledButtons[buttonId] = scaled
+		end
 	end
 	self.display = DisplayRenderer:new(self, self.screenRect, self.definition.theme)
 	self.renderer = self.definition.hardwareType == "smartphone" and SmartphoneRenderer or ClassicRenderer
@@ -266,7 +329,7 @@ function PhonePanel:showIncomingMessage(fromNumber, body)
 		secondary = tr("Dismiss"),
 	})
 	local event = self.instance.data and (self.instance.data.notificationEvent or self.instance.data.ringtoneEvent) or
-	nil
+		nil
 	PhoneUtils.playPhoneAlert(self.playerObj, event, self.instance.data, true, "notification")
 	PhoneUtils.toast(tr("PhoneMessageOn", phoneName), tr("FromContactWithBody", fromLabel, tostring(body or "")), "info",
 		nil, 8)
@@ -312,6 +375,10 @@ function PhonePanel:handleAction(action, payload)
 	if not self.instance.hardware:isPowered() then
 		return false
 	end
+	local currentApp = self.instance and self.instance.os and self.instance.os.currentApp
+	if action == "CLEAR" and currentApp and currentApp.isTextEntryFocused and currentApp:isTextEntryFocused() then
+		return true
+	end
 	local handled = self.instance.os:handleInput({
 		action = action,
 		displayX = payload and payload.displayX,
@@ -319,7 +386,9 @@ function PhonePanel:handleAction(action, payload)
 		value = payload and payload.value,
 		special = payload and payload.special,
 	})
-	local currentApp = self.instance and self.instance.os and self.instance.os.currentApp
+	if not handled and action == "CLEAR" then
+		handled = self.instance.os:handleInput({ action = "BACK" })
+	end
 	if currentApp and currentApp.bringOverlayToTop then
 		currentApp:bringOverlayToTop()
 	end
@@ -334,9 +403,11 @@ function PhonePanel:onMouseDown(x, y)
 	end
 
 	local buttons = self.scaledButtons or {}
-	for action, rect in pairs(buttons) do
-		if x >= rect.x and x <= rect.x + rect.width and y >= rect.y and y <= rect.y + rect.height then
-			return self:handleAction(action)
+	local order = self.buttonOrder or DEFAULT_BUTTON_ORDER
+	for i = 1, #order do
+		local rect = buttons[order[i]]
+		if rect and rect.width > 0 and rect.height > 0 and x >= rect.x and x <= rect.x + rect.width and y >= rect.y and y <= rect.y + rect.height then
+			return self:handleAction(rect.action or order[i], rect)
 		end
 	end
 
@@ -364,10 +435,11 @@ function PhonePanel:onMouseDown(x, y)
 		local notification = self.instance and self.instance.os and self.instance.os.notification
 		if notification then
 			local lines = Common.wrapTextToWidth(
-			(notification.title and (notification.title .. " ") or "") .. tostring(notification.text or ""), UIFont
-			.Small, screen.width - 24, 3)
+				(notification.title and (notification.title .. " ") or "") .. tostring(notification.text or ""), UIFont
+				.Small, screen.width - 24, 3)
 			local notificationHeight = math.max(38, 24 + #lines * 13)
-			local reservedBottom = (self.display.navBarHeight or 0) + (self.display.softFooterHeight or self.display.footerHeight or 0)
+			local reservedBottom = (self.display.navBarHeight or 0) +
+				(self.display.softFooterHeight or self.display.footerHeight or 0)
 			local nY = screen.y + screen.height - reservedBottom - notificationHeight - 4
 			if y >= nY and y <= nY + notificationHeight then
 				return self:handleNotificationAction(x < screen.x + screen.width / 2)
@@ -457,7 +529,9 @@ function PhonePanel:onJoypadDown(button, joypadData)
 	if button == Joypad.LBumper then return self:handleAction("LEFT_SOFT") end
 	if button == Joypad.RBumper then return self:handleAction("RIGHT_SOFT") end
 	if Joypad.Start and button == Joypad.Start then return self:handleAction("MENU") end
-	if Joypad.Back and button == Joypad.Back then self:close(); return true end
+	if Joypad.Back and button == Joypad.Back then
+		self:close(); return true
+	end
 	if Joypad.L3 and button == Joypad.L3 then return self:handleAction("POWER") end
 	if Joypad.R3 and button == Joypad.R3 then return self:handleAction("POWER") end
 end
@@ -519,7 +593,7 @@ end
 function PhonePanel:hintRows(maxWidth)
 	local inputMode = self.lastInputMode or "keyboardMouse"
 	local rows = {
-		{ kind = "title", text = tr("InputHintsTitle") },
+		{ kind = "title",   text = tr("InputHintsTitle") },
 		{ kind = "section", text = inputMode == "controller" and tr("InputHintsController") or tr("InputHintsKeyboard") },
 	}
 
@@ -651,10 +725,11 @@ function PhonePanel:render()
 		local notification = self.instance.os.notification
 		local rect = self.screenRect
 		local text = (notification.title and (notification.title .. " ") or "") ..
-		tostring(notification.text or tr("Notification"))
+			tostring(notification.text or tr("Notification"))
 		local lines = Common.wrapTextToWidth(text, UIFont.Small, rect.width - 24, 3)
 		local notificationHeight = math.max(38, 24 + #lines * 13)
-		local reservedBottom = (self.display.navBarHeight or 0) + (self.display.softFooterHeight or self.display.footerHeight or 0)
+		local reservedBottom = (self.display.navBarHeight or 0) +
+			(self.display.softFooterHeight or self.display.footerHeight or 0)
 		local y = rect.y + rect.height - reservedBottom - notificationHeight - 4
 		self:drawRect(rect.x + 6, y, rect.width - 12, notificationHeight, 0.94, 0.05, 0.12, 0.06)
 		for i = 1, #lines do
@@ -671,12 +746,52 @@ function PhonePanel:render()
 	end
 end
 
+function PhonePanel:refreshLayout()
+	local baseWidth, baseHeight = definitionBaseSize(self.definition, self.phoneTexture)
+	local scale = panelScale(self.definition, baseHeight)
+	local phoneFrameWidth = math.floor(baseWidth * scale)
+	local phoneFrameHeight = math.floor(baseHeight * scale)
+	local hintMargin, hintsWidth, hintsHeight = hintMetrics(phoneFrameWidth, scale)
+	local width = phoneFrameWidth + (hintsWidth > 0 and (hintMargin + hintsWidth + hintMargin) or 0)
+	local height = phoneFrameHeight
+	local centerX = self.x + self.width / 2
+	local centerY = self.y + self.height / 2
+	local x = math.max(0, math.floor(centerX - width / 2))
+	local y = math.max(0, math.floor(centerY - height / 2))
+
+	if self.setX then self:setX(x) else self.x = x end
+	if self.setY then self:setY(y) else self.y = y end
+	if self.setWidth then self:setWidth(width) else self.width = width end
+	if self.setHeight then self:setHeight(height) else self.height = height end
+
+	self.scale = scale
+	self.phoneFrameWidth = phoneFrameWidth
+	self.phoneFrameHeight = phoneFrameHeight
+	self.hintsWidth = hintsWidth
+	self.hintsHeight = hintsHeight
+	self.screenRect = Common.scaledRect(self.definition.screenRect, self.scale)
+	self.scaledButtons = {}
+	self.buttonOrder = definitionButtonOrder(self.definition)
+	for i = 1, #self.buttonOrder do
+		local buttonId = self.buttonOrder[i]
+		local rect = self.definition.buttons and self.definition.buttons[buttonId] or nil
+		if rect then
+			local scaled = Common.scaledRect(rect, self.scale)
+			scaled.action = scaled.action or buttonId
+			scaled.buttonId = buttonId
+			self.scaledButtons[buttonId] = scaled
+		end
+	end
+	self.display = DisplayRenderer:new(self, self.screenRect, self.definition.theme)
+end
+
 function PhonePanel:new(definition, playerNum, item, variantId)
 	definition = Common.copyTable(definition)
 	local variant = PhoneItemRegistry.getVariant(definition.id, variantId or "default")
 	if variant then
 		definition.displayNameKey = variant.displayNameKey or definition.displayNameKey
-		definition.displayName = I18N.translatedName(definition.displayNameKey, variant.displayName or definition.displayName)
+		definition.displayName = I18N.translatedName(definition.displayNameKey,
+			variant.displayName or definition.displayName)
 		definition.texture = variant.texture or definition.texture
 		definition.variant = variant
 	end
@@ -687,14 +802,7 @@ function PhonePanel:new(definition, playerNum, item, variantId)
 	local scale = panelScale(definition, baseHeight)
 	local phoneFrameWidth = math.floor(baseWidth * scale)
 	local phoneFrameHeight = math.floor(baseHeight * scale)
-	local hintMargin = math.max(8, math.floor(8 * scale))
-	local hintsWidth = 0
-	local hintsHeight = 0
-	if PhoneSettings.showInputHints then
-		local longestModeLines = math.max(#HINT_LINE_KEYS, #HINT_CONTROLLER_LINES)
-		hintsHeight = 5 + 13 + 12 + longestModeLines * 12 + 5
-		hintsWidth = math.max(132, math.min(220, math.floor(phoneFrameWidth * 0.58)))
-	end
+	local hintMargin, hintsWidth, hintsHeight = hintMetrics(phoneFrameWidth, scale)
 	local width = phoneFrameWidth + (hintsWidth > 0 and (hintMargin + hintsWidth + hintMargin) or 0)
 	local height = phoneFrameHeight
 	local x = (getCore():getScreenWidth() - width) / 2

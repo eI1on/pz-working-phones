@@ -43,8 +43,8 @@ AppRegistry.register("snake", SnakeApp, {
 	game = true,
 	gameOrder = 10,
 	showInGamesHub = true,
-	autoInstall = true,
-	hardwareTypes = { "smartphone" },
+	installOnHardware = { "smartphone" },
+	hardwareTypes = { "classic", "smartphone" },
 })
 AppRegistry.register("tetris", TetrisApp, {
 	nameKey = "App_tetris",
@@ -52,8 +52,8 @@ AppRegistry.register("tetris", TetrisApp, {
 	game = true,
 	gameOrder = 20,
 	showInGamesHub = true,
-	autoInstall = true,
-	hardwareTypes = { "smartphone" },
+	installOnHardware = { "smartphone" },
+	hardwareTypes = { "classic", "smartphone" },
 })
 AppRegistry.register("chess", ChessApp, {
 	nameKey = "App_chess",

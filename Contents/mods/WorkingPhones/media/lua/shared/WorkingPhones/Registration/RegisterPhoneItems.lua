@@ -4,22 +4,17 @@ local PhoneItemRegistry = require("WorkingPhones/Registries/PhoneItemRegistry")
 PhoneItemRegistry.registerVariant("classic_2110", "black", {
 	displayName = "Classic 2210 Phone",
 	displayNameKey = "PhoneClassic2210",
-	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front.png",
+	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front_black.png",
 })
 PhoneItemRegistry.registerVariant("classic_2110", "blue", {
 	displayName = "Blue Classic 2210 Phone",
 	displayNameKey = "PhoneClassic2210Blue",
-	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front.png",
+	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front_blue.png",
 })
 PhoneItemRegistry.registerVariant("classic_2110", "red", {
 	displayName = "Red Classic 2210 Phone",
 	displayNameKey = "PhoneClassic2210Red",
-	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front.png",
-})
-PhoneItemRegistry.registerVariant("classic_2110", "gray", {
-	displayName = "Gray Classic 2210 Phone",
-	displayNameKey = "PhoneClassic2210Gray",
-	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front.png",
+	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front_red.png",
 })
 PhoneItemRegistry.registerVariant("generic_smartphone", "black", {
 	displayName = "Black Smartphone",
@@ -50,19 +45,15 @@ PhoneItemRegistry.registerSpawnGroup("generic_smartphone", {
 })
 
 PhoneItemRegistry.registerItem("Classic2210Phone", "classic_2110", "black", {
-	spawnWeight = 65,
+	spawnWeight = 60,
 	hardwareType = "classic",
 })
 PhoneItemRegistry.registerItem("Classic2210PhoneBlue", "classic_2110", "blue", {
-	spawnWeight = 15,
+	spawnWeight = 25,
 	hardwareType = "classic",
 })
 PhoneItemRegistry.registerItem("Classic2210PhoneRed", "classic_2110", "red", {
-	spawnWeight = 10,
-	hardwareType = "classic",
-})
-PhoneItemRegistry.registerItem("Classic2210PhoneGray", "classic_2110", "gray", {
-	spawnWeight = 10,
+	spawnWeight = 15,
 	hardwareType = "classic",
 })
 

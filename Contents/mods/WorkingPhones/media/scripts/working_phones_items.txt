@@ -62,17 +62,6 @@ module WorkingPhones
         Tooltip = Tooltip_WorkingPhones_Phone,
     }
 
-    item Classic2210PhoneGray
-    {
-        DisplayCategory = Electronics,
-        Type = Normal,
-        DisplayName = Gray Classic 2210 Phone,
-        Icon	=	CordlessPhone,
-        WorldStaticModel = CordlessPhone,
-        Weight = 0.3,
-        Tooltip = Tooltip_WorkingPhones_Phone,
-    }
-
     item SmartphoneBlack
     {
         DisplayCategory = Electronics,
