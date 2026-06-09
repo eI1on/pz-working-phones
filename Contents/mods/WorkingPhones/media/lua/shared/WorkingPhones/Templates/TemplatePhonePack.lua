@@ -23,6 +23,8 @@ PhoneRegistry.register({
 	hardwareType = "smartphone",
 	defaultApps = { "phone", "messages", "contacts", "clock", "settings", "sounds" },
 	inputMode = "touch",
+	-- Optional: register your own profile with WorkingPhones/Registries/PhoneAnimationRegistry.
+	animationProfile = "default_phone_side",
 	soundProfile = {
 		soundPacks = { "my_mod_phone_pack", "shared_vibration" },
 		defaultRingtone = "my_mod_ring_soft",
@@ -42,6 +44,38 @@ PhoneRegistry.register({
 	panel = {
 		scale = 1,
 		maxScreenHeightRatio = 0.9,
+	},
+})
+]]
+
+-- Optional client animation profile example:
+--[[
+local AnimationRegistry = require("WorkingPhones/Registries/PhoneAnimationRegistry")
+
+AnimationRegistry.registerProfile("my_mod_phone_profile", {
+	startMode = "idle",
+	stopMode = "idle",
+	phonePropSlot = "secondary",
+	phonePropModel = "MyPhoneHandModel",
+	defaultStartTicks = 22,
+	defaultFinishTicks = 18,
+	defaultEndTicks = 20,
+	modes = {
+		idle = {
+			start = "MyPhonePull",
+			loop = "MyPhonePullLoop",
+			finish = "MyPhoneEnd",
+		},
+		text = {
+			start = "MyPhoneTextStart",
+			loop = "MyPhoneTextLoop",
+			finish = "MyPhoneTextEnd",
+		},
+		call = {
+			start = "MyPhoneCallStart",
+			loop = "MyPhoneCallLoop",
+			finish = "MyPhoneCallEnd",
+		},
 	},
 })
 ]]

@@ -10,6 +10,7 @@ local Common = require("WorkingPhones/Common/PhoneCommon")
 local DisplayRenderer = require("WorkingPhones/UI/PhoneDisplayRenderer")
 local ClassicRenderer = require("WorkingPhones/UI/ClassicPhoneRenderer")
 local SmartphoneRenderer = require("WorkingPhones/UI/SmartphoneRenderer")
+local PhoneAnimationController = require("WorkingPhones/Core/PhoneAnimationController")
 
 local PhonePanel = ISPanel:derive("WorkingPhones_PhonePanel")
 PhonePanel.activePanel = nil
@@ -264,6 +265,10 @@ function PhonePanel:close()
 		setJoypadFocus(self.playerNum or 0, self.prevJoypadFocus)
 	elseif self.joyfocus and setJoypadFocus then
 		setJoypadFocus(self.playerNum or 0, nil)
+	end
+	if self.animationController then
+		self.animationController:stop()
+		self.animationController = nil
 	end
 	self:setVisible(false)
 	self:removeFromUIManager()
@@ -581,12 +586,49 @@ function PhonePanel:onMouseWheel(delta)
 	return self:handleAction("DOWN")
 end
 
+function PhonePanel:animationMode()
+	local os = self.instance and self.instance.os or nil
+	local currentApp = os and os.currentApp or nil
+	local notification = os and os.notification or nil
+	local activeCall = self.instance and self.instance.data and self.instance.data.activeCall or nil
+	if self.definition and self.definition.animationModeResolver then
+		local resolved = self.definition.animationModeResolver(self.instance, currentApp, notification)
+		if resolved then
+			return resolved
+		end
+	end
+	if currentApp and currentApp.getPhoneAnimationMode then
+		local resolved = currentApp:getPhoneAnimationMode(self.instance)
+		if resolved then
+			return resolved
+		end
+	end
+	if currentApp and currentApp.phoneAnimationMode then
+		return currentApp.phoneAnimationMode
+	end
+	if activeCall or (notification and notification.kind == "call") then
+		return "call"
+	end
+	if currentApp then
+		if currentApp.calling or currentApp.inlineCall then
+			return "call"
+		end
+		if currentApp.isTextEntryFocused and currentApp:isTextEntryFocused() then
+			return "text"
+		end
+	end
+	return "idle"
+end
+
 function PhonePanel:update()
 	ISPanel.update(self)
 	self.instance.os:update(33)
 	local currentApp = self.instance and self.instance.os and self.instance.os.currentApp
 	if currentApp and currentApp.syncOverlayGeometry then
 		currentApp:syncOverlayGeometry(self.display)
+	end
+	if self.animationController then
+		self.animationController:setMode(self:animationMode())
 	end
 end
 
@@ -823,6 +865,7 @@ function PhonePanel:new(definition, playerNum, item, variantId)
 	o.hintsHeight = hintsHeight
 	o.lastInputMode = "keyboardMouse"
 	o.instance = PhoneInstance:new(definition, o.playerObj, item)
+	o.animationController = PhoneAnimationController:new(o.playerObj, item, definition)
 	o.moveWithMouse = true
 	o.backgroundColor = { r = 0, g = 0, b = 0, a = 0 }
 	o.borderColor = { r = 0, g = 0, b = 0, a = 0 }
@@ -837,6 +880,9 @@ function PhonePanel.open(definition, playerNum, item, variantId)
 	panel:initialise()
 	panel:addToUIManager()
 	panel:takeJoypadFocus()
+	if panel.animationController then
+		panel.animationController:setMode("idle")
+	end
 	PhonePanel.activePanel = panel
 	return panel
 end

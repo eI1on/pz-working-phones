@@ -68,6 +68,7 @@ Core APIs:
 - `WorkingPhones/Core/PhoneRegistry`: register phone definitions.
 - `WorkingPhones/Core/PhoneAppRegistry`: register apps and games.
 - `WorkingPhones/Registries/PhoneItemRegistry`: map item types and variants to phone definitions.
+- `WorkingPhones/Registries/PhoneAnimationRegistry`: register phone animation profiles and custom app modes.
 - `WorkingPhones/Registries/PhoneSoundRegistry`: register sound choices and vibration events.
 - `WorkingPhones/Registries/SmartphoneWallpaperRegistry`: register smartphone wallpapers.
 
@@ -78,6 +79,89 @@ Templates live in:
 - `media/lua/shared/WorkingPhones/Templates/TemplateGameApp.lua`
 - `media/lua/shared/WorkingPhones/Templates/TemplateSoundPack.lua`
 - `media/lua/shared/WorkingPhones/Templates/TemplateWallpaperPack.lua`
+
+## Phone Animations
+
+Working Phones uses animation profiles so addons can replace the side phone animations without editing the core controller. A profile defines:
+
+- `startMode`: mode used when the phone first opens, usually `idle`.
+- `stopMode`: mode used when the phone closes, usually `idle`.
+- `phonePropSlot`: `secondary` by default. Use `primary` only if your animation expects the phone prop in the other rendered hand.
+- `phonePropModel`: optional hand model string. Defaults to the phone item's `StaticModel`, then `CordlessPhone`.
+- `defaultStartTicks`, `defaultFinishTicks`, `defaultEndTicks`: transition timing.
+- `modes`: animation mode tables. Each mode can define `start`, `loop`, `finish`, and optional timing overrides.
+
+Client registration example:
+
+```lua
+local AnimationRegistry = require("WorkingPhones/Registries/PhoneAnimationRegistry")
+
+AnimationRegistry.registerProfile("my_mod_flip_phone", {
+	startMode = "idle",
+	stopMode = "idle",
+	phonePropSlot = "secondary",
+	phonePropModel = "MyFlipPhoneHand",
+	defaultStartTicks = 18,
+	defaultFinishTicks = 14,
+	defaultEndTicks = 18,
+	modes = {
+		idle = {
+			start = "MyFlipPhoneOpen",
+			loop = "MyFlipPhoneIdleLoop",
+			finish = "MyFlipPhoneClose",
+		},
+		text = {
+			start = "MyFlipPhoneTextStart",
+			loop = "MyFlipPhoneTextLoop",
+			finish = "MyFlipPhoneTextEnd",
+		},
+		call = {
+			start = "MyFlipPhoneCallStart",
+			loop = "MyFlipPhoneCallLoop",
+			finish = "MyFlipPhoneCallEnd",
+		},
+		inspect = {
+			start = "MyFlipPhoneInspectStart",
+			loop = "MyFlipPhoneInspectLoop",
+			finish = "MyFlipPhoneInspectEnd",
+			startTicks = 12,
+			finishTicks = 12,
+		},
+	},
+})
+```
+
+Use the profile in a phone definition:
+
+```lua
+PhoneRegistry.register({
+	id = "my_mod_phone",
+	animationProfile = "my_mod_flip_phone",
+	-- other phone definition fields...
+})
+```
+
+Apps can request a custom animation mode in three ways:
+
+```lua
+-- Static mode while this app is open:
+App.phoneAnimationMode = "inspect"
+
+-- Dynamic mode:
+function App:getPhoneAnimationMode(instance)
+	if self.isWriting then return "text" end
+	if self.isCalling then return "call" end
+	return "inspect"
+end
+
+-- Phone-wide override:
+animationModeResolver = function(instance, currentApp, notification)
+	if notification and notification.kind == "call" then return "call" end
+	return nil
+end
+```
+
+If a requested mode is missing from the phone's profile, Working Phones falls back to that profile's `startMode`.
 
 ## Adding A New Phone
 
@@ -98,6 +182,7 @@ PhoneRegistry.register({
 	hardwareType = "smartphone",
 	defaultApps = { "phone", "messages", "contacts", "clock", "settings", "sounds" },
 	inputMode = "touch",
+	animationProfile = "default_phone_side",
 	soundProfile = {
 		soundPacks = { "my_mod_phone_pack", "shared_vibration" },
 		defaultRingtone = "my_mod_ring_soft",

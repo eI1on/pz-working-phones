@@ -6,7 +6,7 @@ return PhoneRegistry.register({
 	displayName = "Classic 2210 Phone",
 	displayNameKey = "PhoneClassic2210",
 	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front_black.png",
-	screenRect = { x = 94, y = 525, width = 443, height = 402 },
+	screenRect = { x = 94, y = 525, width = 443, height = 403 },
 	theme = "classic_green",
 	hardwareType = "classic",
 	supportedApps = {
@@ -36,6 +36,7 @@ return PhoneRegistry.register({
 		"settings",
 	},
 	inputMode = "keypad",
+	animationProfile = "default_phone_side",
 	soundProfile = {
 		soundPacks = { "classic_2110", "shared_vibration" },
 		defaultRingtone = "classic_ring_1",

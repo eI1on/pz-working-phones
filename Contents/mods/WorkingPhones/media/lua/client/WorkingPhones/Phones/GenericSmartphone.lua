@@ -36,6 +36,7 @@ return PhoneRegistry.register({
 		"settings",
 	},
 	inputMode = "touch",
+	animationProfile = "default_phone_side",
 	soundProfile = {
 		soundPacks = { "generic_smartphone", "shared_vibration" },
 		defaultRingtone = "smartphone_ring_1",

@@ -38,6 +38,13 @@ function App:onClose()
 	-- Good place to stop previews, save small phone-local settings, etc.
 end
 
+function App:getPhoneAnimationMode(instance)
+	-- Optional. Return a mode registered in the phone's animation profile.
+	-- Built-in modes are "idle", "text", and "call".
+	-- Return nil to let Working Phones choose the default mode.
+	return nil
+end
+
 function App:activateSelected()
 	local row = self.rows[self.selected]
 	if not row then return false end
