@@ -13,6 +13,7 @@ function App:new(os)
 	o.optionsOpen = false
 	o.optionIndex = 1
 	o.options = { "Zoom", "Follow", "Symbols", "Iso", "Center" }
+	o.optionRects = {}
 	o.zoom = os.instance.data.mapZoom or 18
 	o.followPlayer = os.instance.data.mapFollowPlayer ~= false
 	o.showSymbols = os.instance.data.mapShowSymbols == true
@@ -52,7 +53,7 @@ end
 
 function App:getMapLocalGeometry(display)
 	local x = display.x + 1
-	local y = display.y + display.statusBarHeight
+	local y = display.contentY
 	local w = display.width - 2
 	local h = math.max(1, display.contentBottom - y)
 	return x, y, w, h
@@ -156,6 +157,22 @@ function App:handleInput(event)
 	end
 
 	if self.optionsOpen then
+		if event.action == "MOUSE_DOWN" and event.displayX and event.displayY then
+			for i = #self.optionRects, 1, -1 do
+				local rect = self.optionRects[i]
+				if event.displayX >= rect.x and event.displayX <= rect.x + rect.w
+					and event.displayY >= rect.y and event.displayY <= rect.y + rect.h then
+					self.optionIndex = rect.index
+					if rect.delta then
+						self:adjustOption(rect.delta)
+					else
+						self:adjustOption(1)
+					end
+					return true
+				end
+			end
+			return true
+		end
 		if event.action == "UP" then
 			self.optionIndex = math.max(1, self.optionIndex - 1)
 			return true
@@ -236,6 +253,7 @@ end
 function App:renderOptions(display)
 	display:clear()
 	display:drawHeader(I18N.get("MapOptions"))
+	self.optionRects = {}
 	local top, visibleRows, contentRight, hasScrollbar = display:getVisibleListMetrics(20, #self.options)
 	local offset = math.max(0, math.min(self.optionIndex - visibleRows, math.max(0, #self.options - visibleRows)))
 	for i = offset + 1, math.min(#self.options, offset + visibleRows) do
@@ -247,8 +265,18 @@ function App:renderOptions(display)
 		end
 		local color = selected and display.colors.bg or display.colors.fg
 		local option = self.options[i]
+		local localY = y - display.y - 1
+		self.optionRects[#self.optionRects + 1] = { x = 4, y = localY, w = contentRight - display.x - 4, h = 20, index = i }
 		display:drawText(I18N.get("MapOption_" .. option), display.x + 10, y, color)
-		display:drawTextRight(self:optionValue(option), contentRight - 2, y, color)
+		local value = self:optionValue(option)
+		if value ~= "" then
+			local rightX = contentRight - 2
+			display:drawText("<", rightX - 50, y, color)
+			display:drawTextRight(value, rightX - 10, y, color)
+			display:drawText(">", rightX - 6, y, color)
+			self.optionRects[#self.optionRects + 1] = { x = rightX - 58 - display.x, y = localY, w = 22, h = 20, index = i, delta = -1 }
+			self.optionRects[#self.optionRects + 1] = { x = rightX - 10 - display.x, y = localY, w = 22, h = 20, index = i, delta = 1 }
+		end
 	end
 	if hasScrollbar then
 		display:drawScrollbar(#self.options, visibleRows, offset, top, display.contentBottom)
@@ -266,6 +294,7 @@ function App:render(display)
 	end
 
 	display:clear()
+	display:drawHeader(I18N.app("map"))
 	self:ensureMapView(display)
 	self.mapView:setVisible(true)
 	display:drawFooter(I18N.get("Options"), I18N.get("Back"))

@@ -14,7 +14,6 @@ function PhoneRegistry.register(definition)
 	end
 
 	PhoneRegistry.definitions[definition.id] = definition
-	WorkingPhones.log("Registered phone: " .. definition.id)
 	return definition
 end
 

@@ -9,6 +9,7 @@ WorkingPhones = WorkingPhones or {}
 
 local KEYBINDINGS = {
 	OPEN_PHONE = { name = "WorkingPhones_OpenPhone", key = Keyboard and Keyboard.KEY_NONE or 0 },
+	CLOSE_PHONE = { name = "WorkingPhones_ClosePhone", key = Keyboard and Keyboard.KEY_ESCAPE or 0 },
 	POWER = { name = "WorkingPhones_PhonePower", key = Keyboard and Keyboard.KEY_P or 0 },
 	UP = { name = "WorkingPhones_PhoneUp", key = Keyboard and Keyboard.KEY_UP or 0 },
 	ALT_UP = { name = "WorkingPhones_PhoneAltUp", key = Keyboard and Keyboard.KEY_NONE or 0 },
@@ -29,6 +30,7 @@ local KEYBINDINGS = {
 
 local KEYBINDING_ORDER = {
 	"OPEN_PHONE",
+	"CLOSE_PHONE",
 	"POWER",
 	"UP",
 	"ALT_UP",

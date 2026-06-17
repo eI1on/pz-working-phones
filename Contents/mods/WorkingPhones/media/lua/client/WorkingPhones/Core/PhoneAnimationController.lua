@@ -267,6 +267,12 @@ function PhoneAnimationController:stop()
 	if self.stopping then
 		return
 	end
+	if not self.phoneUseAction or not ISTimedActionQueue.hasAction(self.phoneUseAction) then
+		self.phoneUseAction = nil
+		clearAction(self.playerObj, self.profile)
+		removeActive(self)
+		return
+	end
 	local finishingStage = self.mode and modeStage(self.profile, self.mode) or nil
 	local stopStage = modeStage(self.profile, self.profile.stopMode)
 	self.mode = nil

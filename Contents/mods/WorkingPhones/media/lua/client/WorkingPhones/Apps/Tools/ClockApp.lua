@@ -1,5 +1,3 @@
-require "ISUI/ISTextEntryBox"
-
 local Base = require("WorkingPhones/Apps/Base/BasePhoneApp")
 local PhoneUtils = require("WorkingPhones/Core/PhoneUtils")
 local I18N = require("WorkingPhones/Core/PhoneI18N")
@@ -41,7 +39,6 @@ function App:new(os)
 	o.editField = 1
 	o.optionIndex = 1
 	o.lastRingKey = nil
-	o.nameEntry = nil
 	return o
 end
 
@@ -50,7 +47,6 @@ function App:newAlarm()
 	local hour = (gt:getHour() + 1) % 24
 	local sound = SoundRegistry.resolve(self.os.instance.data.alarmId, "alarm", self.os.definition)
 	return {
-		name = tr("Alarm"),
 		hour = hour,
 		minute = 0,
 		enabled = true,
@@ -62,18 +58,6 @@ end
 
 function App:onClose()
 	PhoneAudioEngine.stopPreview()
-	self:removeNameEntry()
-end
-
-function App:removeNameEntry()
-	if self.nameEntry then
-		if self.os.instance.os and self.os.instance.os.displayPanel then
-			self.os.instance.os.displayPanel:removeChild(self.nameEntry)
-		else
-			self.nameEntry:removeFromUIManager()
-		end
-		self.nameEntry = nil
-	end
 end
 
 function App:save()
@@ -92,8 +76,7 @@ function App:alarmLabel(alarm)
 		if alarm.days[i] then table.insert(days, I18N.dayShort(i)) end
 	end
 	local suffix = #days == 7 and tr("EveryDay") or table.concat(days, " ")
-	local name = tostring(alarm.name or tr("Alarm"))
-	return name .. " " .. string.format("%02d:%02d %s", alarm.hour or 0, alarm.minute or 0, alarm.enabled and suffix or tr("Off"))
+	return string.format("%02d:%02d %s", alarm.hour or 0, alarm.minute or 0, alarm.enabled and suffix or tr("Off"))
 end
 
 function App:alarmSound(alarm)
@@ -124,7 +107,7 @@ function App:update(deltaTime)
 		if alarm.enabled and alarm.hour == gt:getHour() and alarm.minute == gt:getMinutes() and alarm.days[self:dayIndex()] then
 			self.os:pushNotification({
 				kind = "alarm",
-				text = tostring(alarm.name or tr("Alarm")) .. " " .. tr("AlarmAt", string.format("%02d:%02d", alarm.hour, alarm.minute)),
+				text = tr("AlarmAt", string.format("%02d:%02d", alarm.hour, alarm.minute)),
 				primary = tr("Open"),
 				secondary = tr("Dismiss"),
 			})
@@ -221,22 +204,17 @@ function App:handleEditInput(event)
 	if not alarm then
 		self.mode = "list"; return true
 	end
-	if self.nameEntry then alarm.name = self.nameEntry:getText() end
 	if event.action == "UP" then
 		self.editField = math.max(1, self.editField - 1)
 		return true
 	elseif event.action == "DOWN" then
-		self.editField = math.min(12, self.editField + 1)
+		self.editField = math.min(11, self.editField + 1)
 		return true
 	elseif event.action == "MOUSE_DOWN" and event.displayY then
 		local row = self.editOffset and (self.editOffset + math.floor((event.displayY - (self.editTop or 0)) / 18) + 1) or nil
 		if row then
-			self.editField = math.max(1, math.min(12, row))
-			if self.editField == 1 and self.nameEntry then
-				self.nameEntry:focus()
-				return true
-			end
-			if self.editField == 2 or self.editField == 3 or self.editField == 5 then
+			self.editField = math.max(1, math.min(11, row))
+			if self.editField == 1 or self.editField == 2 or self.editField == 4 then
 				local midpoint = math.floor((tonumber(self.editRightLocal) or 0) / 2)
 				return self:handleEditInput({ action = event.displayX and event.displayX < midpoint and "LEFT" or "RIGHT" })
 			end
@@ -245,14 +223,12 @@ function App:handleEditInput(event)
 	elseif event.action == "LEFT" or event.action == "RIGHT" or event.action == "OK" then
 		local delta = event.action == "LEFT" and -1 or 1
 		if self.editField == 1 then
-			if self.nameEntry then self.nameEntry:focus() end
-		elseif self.editField == 2 then
 			alarm.hour = (alarm.hour + delta) % 24
-		elseif self.editField == 3 then
+		elseif self.editField == 2 then
 			alarm.minute = (alarm.minute + delta * 5) % 60
-		elseif self.editField == 4 then
+		elseif self.editField == 3 then
 			alarm.enabled = not alarm.enabled
-		elseif self.editField == 5 then
+		elseif self.editField == 4 then
 			if event.action == "OK" then
 				local sound = self:alarmSound(alarm)
 				PhoneUtils.playPhoneAlert(self.os.instance.playerObj,
@@ -266,21 +242,18 @@ function App:handleEditInput(event)
 					self.os.instance.data, false, "alarm", true)
 			end
 		else
-			local day = self.editField - 5
+			local day = self.editField - 4
 			alarm.days[day] = not alarm.days[day]
 		end
 		self:save()
 		return true
 	elseif event.action == "LEFT_SOFT" then
-		if self.nameEntry then alarm.name = self.nameEntry:getText() end
 		PhoneAudioEngine.stopPreview()
-		self:removeNameEntry()
 		self.mode = "list"
 		self:save()
 		return true
 	elseif event.action == "RIGHT_SOFT" then
 		PhoneAudioEngine.stopPreview()
-		self:removeNameEntry()
 		self.mode = "list"
 		return true
 	end
@@ -299,7 +272,6 @@ function App:handleInput(event)
 end
 
 function App:renderList(display)
-	self:removeNameEntry()
 	display:clear()
 	display:drawHeader(I18N.app("clock"))
 	local gt = getGameTime()
@@ -326,7 +298,6 @@ function App:renderList(display)
 end
 
 function App:renderOptions(display)
-	self:removeNameEntry()
 	display:clear()
 	display:drawHeader(tr("AlarmOptions"))
 	local top, visible, right, hasScrollbar = display:getVisibleListMetrics(18, #OPTIONS)
@@ -343,27 +314,12 @@ function App:renderOptions(display)
 	display:drawFooter(tr("Select"), tr("Back"))
 end
 
-function App:ensureNameEntry(display, alarm, x, y, w, h)
-	if not self.nameEntry then
-		self.nameEntry = ISTextEntryBox:new(tostring(alarm.name or tr("Alarm")), x, y, w, h)
-		self.nameEntry:initialise()
-		self.nameEntry:instantiate()
-		self.nameEntry:setMaxTextLength(24)
-		self.nameEntry.font = UIFont.Small
-		display.panel:addChild(self.nameEntry)
-	else
-		self.nameEntry:setX(x); self.nameEntry:setY(y); self.nameEntry:setWidth(w); self.nameEntry:setHeight(h)
-	end
-	self.nameEntry:setVisible(true)
-end
-
 function App:renderEdit(display)
 	display:clear()
 	display:drawHeader(tr("EditAlarm"))
 	local alarm = self.alarms[self.selected]
 	local alarmSound = self:alarmSound(alarm)
 	local rows = {
-		{ tr("AlarmName"), tostring(alarm.name or tr("Alarm")) },
 		{ tr("Hour"),      string.format("%02d", alarm.hour) },
 		{ tr("Minute"),    string.format("%02d", alarm.minute) },
 		{ tr("Enabled"),   alarm.enabled and tr("On") or tr("Off") },
@@ -375,22 +331,13 @@ function App:renderEdit(display)
 	self.editTop = top - display.y
 	self.editOffset = offset
 	self.editRightLocal = right - display.x
-	if offset > 0 then
-		self:removeNameEntry()
-	end
 	for i = offset + 1, math.min(#rows, offset + visible) do
 		local y = top + (i - offset - 1) * 18
 		if i == self.editField then display:fillRect(display.x + 4, y - 1, right - display.x - 4, 16,
 				display.colors.accent) end
 		local color = i == self.editField and display.colors.bg or display.colors.fg
 		display:drawText(rows[i][1], display.x + 8, y, color)
-		if i == 1 then
-			local entryX = display.x + 82
-			local entryW = right - entryX - 2
-			self:ensureNameEntry(display, alarm, entryX, y - 2, entryW, 18)
-		else
-			display:drawTextRight(rows[i][2], right - 2, y, color)
-		end
+		display:drawTextRight(rows[i][2], right - 2, y, color)
 	end
 	if hasScrollbar then display:drawScrollbar(#rows, visible, offset, top, display.contentBottom) end
 	display:drawFooter(tr("Save"), tr("Back"))

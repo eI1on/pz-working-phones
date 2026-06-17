@@ -35,6 +35,39 @@ local function tr(key, ...)
 	return I18N.get(key, ...)
 end
 
+local function clearTextEntry(entry)
+	if entry and entry.isFocused and entry:isFocused() and entry.setText then
+		entry:setText("")
+		if entry.focus then
+			entry:focus()
+		end
+		return true
+	end
+	return false
+end
+
+local function clearFocusedTextEntry(app)
+	if not app then
+		return false
+	end
+	if app.clearFocusedTextEntry then
+		return app:clearFocusedTextEntry()
+	end
+	local directFields = { "entryBox", "composeEntry", "nameEntry" }
+	for i = 1, #directFields do
+		if clearTextEntry(app[directFields[i]]) then
+			return true
+		end
+	end
+	local keyedFields = { "name", "number" }
+	for i = 1, #keyedFields do
+		if clearTextEntry(app.entries and app.entries[keyedFields[i]]) then
+			return true
+		end
+	end
+	return false
+end
+
 local FALLBACK_KEYS = {
 	UP = Keyboard and Keyboard.KEY_UP or 0,
 	DOWN = Keyboard and Keyboard.KEY_DOWN or 0,
@@ -53,6 +86,7 @@ local FALLBACK_KEYS = {
 	MENU = Keyboard and Keyboard.KEY_TAB or 0,
 	POWER = Keyboard and Keyboard.KEY_P or 0,
 	OPEN_PHONE = Keyboard and Keyboard.KEY_NONE or 0,
+	CLOSE_PHONE = Keyboard and Keyboard.KEY_ESCAPE or 0,
 }
 
 local HINT_LINE_KEYS = {
@@ -68,6 +102,7 @@ local HINT_LINE_KEYS = {
 	{ "InputHintLineMenu",  "MENU" },
 	{ "InputHintLinePower", "POWER" },
 	{ "InputHintLineOpen",  "OPEN_PHONE" },
+	{ "InputHintLineClose", "CLOSE_PHONE" },
 }
 
 local DEFAULT_BUTTON_ORDER = {
@@ -172,6 +207,7 @@ local function keyAction(key)
 	if keyMatches(key, "ABC") then return "ABC" end
 	if keyMatches(key, "MENU") then return "MENU" end
 	if keyMatches(key, "POWER") then return "POWER" end
+	if keyMatches(key, "CLOSE_PHONE") then return "CLOSE_PHONE" end
 
 	local digitKeys = {}
 	if Keyboard.KEY_0 then digitKeys[Keyboard.KEY_0] = 0 end
@@ -366,6 +402,10 @@ function PhonePanel:handleNotificationAction(primary)
 end
 
 function PhonePanel:handleAction(action, payload)
+	if action == "CLOSE_PHONE" then
+		self:close()
+		return true
+	end
 	if self.instance and self.instance.os and self.instance.os.notification then
 		if action == "LEFT_SOFT" or action == "OK" then
 			return self:handleNotificationAction(true)
@@ -381,7 +421,7 @@ function PhonePanel:handleAction(action, payload)
 		return false
 	end
 	local currentApp = self.instance and self.instance.os and self.instance.os.currentApp
-	if action == "CLEAR" and currentApp and currentApp.isTextEntryFocused and currentApp:isTextEntryFocused() then
+	if action == "CLEAR" and clearFocusedTextEntry(currentApp) then
 		return true
 	end
 	local handled = self.instance.os:handleInput({
@@ -887,7 +927,41 @@ function PhonePanel.open(definition, playerNum, item, variantId)
 	return panel
 end
 
+local swallowedCloseKey = nil
+
+local function eatPhoneKey(key)
+	if GameKeyboard and GameKeyboard.eatKeyPress then
+		GameKeyboard.eatKeyPress(key)
+	end
+end
+
+local function closeActivePanelForKey(key)
+	if not PhonePanel.activePanel or not PhonePanel.activePanel:isVisible() then
+		return false
+	end
+	local action = keyAction(key)
+	if action ~= "CLOSE_PHONE" then
+		return false
+	end
+	PhonePanel.activePanel:handleAction(action)
+	swallowedCloseKey = key
+	eatPhoneKey(key)
+	return true
+end
+
+local function onKeyStartPressed(key)
+	closeActivePanelForKey(key)
+end
+
 local function onKeyPressed(key)
+	if swallowedCloseKey == key then
+		swallowedCloseKey = nil
+		eatPhoneKey(key)
+		return
+	end
+	if closeActivePanelForKey(key) then
+		return
+	end
 	if PhonePanel.activePanel and PhonePanel.activePanel:isVisible() then
 		local currentApp = PhonePanel.activePanel.instance and PhonePanel.activePanel.instance.os and
 			PhonePanel.activePanel.instance.os.currentApp
@@ -905,6 +979,7 @@ local function onKeyPressed(key)
 	end
 end
 
+Events.OnKeyStartPressed.Add(onKeyStartPressed)
 Events.OnKeyPressed.Add(onKeyPressed)
 
 WorkingPhones.PhonePanel = PhonePanel

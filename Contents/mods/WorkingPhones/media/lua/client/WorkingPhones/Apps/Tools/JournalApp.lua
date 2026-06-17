@@ -82,11 +82,25 @@ end
 
 function App:handleInput(event)
 	if self.mode == "options" then
+		if event.action == "MOUSE_DOWN" and event.displayY then
+			local top = self.lastOptionsTop or 0
+			local visibleRows = self.lastOptionsVisibleRows or #OPTIONS
+			if event.displayY >= top and event.displayY <= top + visibleRows * 20 then
+				local row = math.floor((event.displayY - top) / 20) + 1
+				if row >= 1 and row <= #OPTIONS then
+					self.optionIndex = row
+					self:activateOption()
+					return true
+				end
+			end
+			return true
+		end
 		if event.action == "UP" then self.optionIndex = math.max(1, self.optionIndex - 1); return true end
 		if event.action == "DOWN" then self.optionIndex = math.min(#OPTIONS, self.optionIndex + 1); return true end
 		if event.action == "LEFT_SOFT" or event.action == "OK" then self:activateOption(); return true end
 		if event.action == "RIGHT_SOFT" then self.mode = "list"; return true end
 	elseif self.mode == "edit" then
+		if event.action == "CLEAR" and self.entryBox then self.entryBox:setText(""); self.entryBox:focus(); return true end
 		if event.action == "MOUSE_DOWN" and self.entryBox then self.entryBox:focus(); return true end
 		if event.action == "LEFT_SOFT" or event.action == "OK" then self:saveEdit(); return true end
 		if event.action == "RIGHT_SOFT" then self:saveEdit(); return true end
@@ -97,6 +111,20 @@ function App:handleInput(event)
 	else
 		if event.action == "UP" then self.selected = math.max(1, self.selected - 1); return true end
 		if event.action == "DOWN" then self.selected = math.min(math.max(1, #self.entries), self.selected + 1); return true end
+		if event.action == "MOUSE_DOWN" and event.displayY then
+			local top = self.lastListTop or 0
+			local visibleRows = self.lastListVisibleRows or 0
+			local offset = self.lastListOffset or 0
+			if event.displayY >= top and event.displayY <= top + visibleRows * 20 then
+				local row = offset + math.floor((event.displayY - top) / 20) + 1
+				if self.entries[row] then
+					self.selected = row
+					self.mode = "view"
+					return true
+				end
+			end
+			return true
+		end
 		if event.action == "LEFT_SOFT" then self.mode = "options"; self.optionIndex = 1; return true end
 		if event.action == "OK" and self:current() then self.mode = "view"; return true end
 		if event.action == "RIGHT" then self:deleteCurrent(); return true end
@@ -156,6 +184,9 @@ function App:renderList(display)
 	display:drawHeader(I18N.app("journal"))
 	local top, visibleRows, contentRight, hasScrollbar = display:getVisibleListMetrics(20, #self.entries)
 	local offset = math.max(0, math.min(self.selected - visibleRows, math.max(0, #self.entries - visibleRows)))
+	self.lastListTop = top - display.y
+	self.lastListVisibleRows = visibleRows
+	self.lastListOffset = offset
 	for i = offset + 1, math.min(#self.entries, offset + visibleRows) do
 		local y = top + (i - offset - 1) * 20
 		if i == self.selected then display:fillRect(display.x + 4, y - 1, contentRight - display.x - 4, 18, display.colors.accent) end
@@ -171,6 +202,8 @@ function App:renderOptions(display)
 	display:clear()
 	display:drawHeader(I18N.get("JournalOptions"))
 	local top, visibleRows, contentRight, hasScrollbar = display:getVisibleListMetrics(20, #OPTIONS)
+	self.lastOptionsTop = top - display.y
+	self.lastOptionsVisibleRows = visibleRows
 	for i = 1, #OPTIONS do
 		local y = top + (i - 1) * 20
 		if i == self.optionIndex then display:fillRect(display.x + 4, y - 1, contentRight - display.x - 4, 18, display.colors.accent) end

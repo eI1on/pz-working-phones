@@ -6,7 +6,7 @@ return PhoneRegistry.register({
 	displayName = "Classic 2210 Phone",
 	displayNameKey = "PhoneClassic2210",
 	texture = Assets.CLASSIC_2210_BODY .. "ui_working_phones_classic_phone_front_black.png",
-	screenRect = { x = 94, y = 525, width = 443, height = 403 },
+	screenRect = { x = 94, y = 525, width = 443, height = 407 },
 	theme = "classic_green",
 	hardwareType = "classic",
 	supportedApps = {

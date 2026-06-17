@@ -209,7 +209,6 @@ function App:handleInput(event)
 		return self:handleSmartphoneInput(event)
 	end
 	if event.action == "OK" or event.action == "LEFT_SOFT" then
-		self.os.instance.hardware:togglePower()
 		return true
 	end
 	return Base.handleInput(self, event)
@@ -350,7 +349,7 @@ function App:render(display)
 	display:drawText(I18N.get("HardwareLabel", self.os.definition.hardwareType), display.x + 10, display.y + 42, display.colors.fg)
 	display:drawText(I18N.get("ModeLabel", tostring(self.os.definition.inputMode)), display.x + 10, display.y + 66, display.colors.fg)
 	display:drawText(I18N.get("VariantLabel", tostring(self.os.definition.variant and self.os.definition.variant.displayName or I18N.get("Default"))), display.x + 10, display.y + 90, display.colors.dim)
-	display:drawFooter(I18N.get("Power"), I18N.get("Back"))
+	display:drawFooter("", I18N.get("Back"))
 end
 
 return App

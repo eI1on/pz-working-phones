@@ -116,6 +116,16 @@ function App:previewSound(category)
 		category == "notification" and "notification" or "call", true)
 end
 
+function App:previewFocusedSound()
+	local row = SOUND_ROWS[self.focus]
+	if row and row.category then
+		self:previewSound(row.category)
+	else
+		self:previewSound("ringtone")
+	end
+	return true
+end
+
 function App:handleInput(event)
 	if event.action == "MOUSE_DOWN" and event.displayX and event.displayY then
 		for i = 1, #self.rowRects do
@@ -163,11 +173,9 @@ function App:handleInput(event)
 		end
 		return true
 	elseif event.action == "OK" then
-		local row = SOUND_ROWS[self.focus]
-		if row and row.category then
-			self:previewSound(row.category)
-			return true
-		end
+		return self:previewFocusedSound()
+	elseif event.action == "LEFT_SOFT" then
+		return self:previewFocusedSound()
 	elseif event.action == "SCROLL_UP" or event.action == "SCROLL_DOWN" then
 		local delta = event.action == "SCROLL_UP" and 0.05 or -0.05
 		saveVolume(self, self.volume + delta)
